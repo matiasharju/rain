@@ -37,7 +37,7 @@ try:
             pygame.mixer.music.stop()
             print ('Audio stopped')
 
-        time.sleep(0.1)
+        time.sleep(0.02)
 
 except KeyboardInterrupt:
     GPIO.cleanup()
