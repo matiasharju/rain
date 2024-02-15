@@ -1,5 +1,9 @@
 import os
 
+# Set /dev/gpiomem the correct permissions
+os.system('sudo chown root.gpio /dev/gpiomem')
+os.system('sudo chmod g+rw /dev/gpiomem')
+
 # Set environment variable for audio device before importing pygame
 os.environ['SDL_AUDIODRIVER'] = 'alsa'
 os.environ['SDL_ALSA_SETDMIXRATE'] = '48000'
