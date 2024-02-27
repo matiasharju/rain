@@ -18,8 +18,8 @@ GPIO.setmode(GPIO.BCM)
 
 TRIG = 4
 ECHO = 17
-distanceToFlood = 216.3
-distanceMarginal = 5.0
+distanceToFloor = 208
+distanceMarginal = 10
 
 GPIO.setup(TRIG, GPIO.OUT)
 GPIO.setup(ECHO, GPIO.IN)
@@ -34,9 +34,12 @@ pygame.mixer.init()
 
 try:
     pygame.mixer.music.load(sound)
+    print(sound, 'loaded')
 except pygame.error:
-    print(f"Failed to load sound: {sound}")
+    print('Failed to load sound:', sound)
     exit(1)
+
+pygame.mixer.music.play(loops = -1)
 
 distances_buffer = []
 
@@ -51,9 +54,10 @@ async def distance_measurement():
     global fade_in_task, fade_out_task, fade_in_triggered, fade_out_triggered
     while True:
         GPIO.output(TRIG, True)
-        await asyncio.sleep(0.00001)
+#        await asyncio.sleep(0.00001)
+        await asyncio.sleep(0.06)
         GPIO.output(TRIG, False)
-        
+
         pulse_start = time.time()
 
         while GPIO.input(ECHO) == 0:
@@ -69,22 +73,24 @@ async def distance_measurement():
 
         distance = pulse_duration * 17150
         distance = round(distance, 2)
-        print('Distance:', distance, 'cm')
+#        print('Distance:', distance, 'cm')
 
         distances_buffer.append(distance) # Add 5 latest measurements to buffer
         if len(distances_buffer) > 5:
             distances_buffer.pop(0)
 
         median_distance = sorted(distances_buffer)[len(distances_buffer) // 2] # Take the median measurement
-        
-        if median_distance < (distanceToFloor-distanceMarginal) and not fade_in_triggered and not pygame.mixer.music.get_busy():
+        print('Median distance:', median_distance, 'cm - Actual distance:', distance, 'cm')
+
+        if median_distance < (distanceToFloor-distanceMarginal) and not fade_in_triggered:
             fade_in_task = await fade_change_task(fade_in_task, audio_fade_in)
             fade_in_triggered = True
             fade_out_triggered = False
-        elif median_distance >= (distanceToFloor-distanceMarginal) and distance < (distanceToFloor+2.0) and pygame.mixer.music_get_busy() and not fade_out_triggered:
+        elif median_distance >= (distanceToFloor-distanceMarginal) and median_distance < 300 and not fade_out_triggered:
             fade_out_task = await fade_change_task(fade_out_task, audio_fade_out)
             fade_out_triggered = True
             fade_in_triggered = False
+
 
 async def fade_change_task(current_task, new_task_func):
     if current_task:
@@ -92,15 +98,19 @@ async def fade_change_task(current_task, new_task_func):
     return asyncio.create_task(new_task_func())
 
 async def audio_fade_in():
+#    if not pygame.mixer.music.get_busy():
+#        pygame.mixer.music.play()
+    print('Start fade in.')
     for i in range(0, 100):
         pygame.mixer.music.set_volume(i / 100)
         await asyncio.sleep(0.05)
 
 async def audio_fade_out():
+    print('Start fade out.')
     for i in range(100, 0, -1):
         pygame.mixer.music.set_volume(i / 100)
         await asyncio.sleep(0.05)
-    pygame.mixer.music.stop()
+#    pygame.mixer.music.stop()
 
 async def main():
     asyncio.create_task(distance_measurement())
