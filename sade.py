@@ -18,7 +18,8 @@ GPIO.setmode(GPIO.BCM)
 
 TRIG = 4
 ECHO = 17
-thresholdDistance = 2.0  # distance for person detection
+distanceToFlood = 216.3
+distanceMarginal = 5.0
 
 GPIO.setup(TRIG, GPIO.OUT)
 GPIO.setup(ECHO, GPIO.IN)
@@ -76,11 +77,11 @@ async def distance_measurement():
 
         median_distance = sorted(distances_buffer)[len(distances_buffer) // 2] # Take the median measurement
         
-        if median_distance < thresholdDistance and not fade_in_triggered:
+        if median_distance < (distanceToFloor-distanceMarginal) and not fade_in_triggered and not pygame.mixer.music.get_busy():
             fade_in_task = await fade_change_task(fade_in_task, audio_fade_in)
             fade_in_triggered = True
             fade_out_triggered = False
-        elif median_distance >= thresholdDistance and not fade_out_triggered:
+        elif median_distance >= (distanceToFloor-distanceMarginal) and distance < (distanceToFloor+2.0) and pygame.mixer.music_get_busy() and not fade_out_triggered:
             fade_out_task = await fade_change_task(fade_out_task, audio_fade_out)
             fade_out_triggered = True
             fade_in_triggered = False
