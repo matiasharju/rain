@@ -77,7 +77,12 @@ def measure():
     else:
         print("Temperature:", tP[0])
 
-# Continuous measurement loop
-while True:
-    measure()
-    time.sleep(1)
+try:
+    # Continuous measurement loop
+    while True:
+        measure()
+        time.sleep(1)
+except KeyboardInterrupt:
+    # Handle Ctrl+C gracefully
+    print("\nExiting program...")
+    bus.close()
