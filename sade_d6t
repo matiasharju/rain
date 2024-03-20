@@ -1,0 +1,83 @@
+import smbus
+import time
+
+# Define I2C bus number
+bus_number = 3
+
+# Define sensor address
+sensor_address = 0x0A
+
+# Create an instance of smbus for I2C communication
+bus = smbus.SMBus(bus_number)
+
+# Global variables
+readbuff = [0] * 35
+tPTAT = 0
+tP = [0] * 16
+tPEC = 0
+
+def calc_crc(data):
+    crc = data
+    for _ in range(8):
+        temp = crc
+        crc <<= 1
+        if temp & 0x80:
+            crc ^= 0x07
+    return crc
+
+def D6T_checkPEC(buf, pPEC):
+    crc = calc_crc(0x14)
+    crc = calc_crc(0x4C ^ crc)
+    crc = calc_crc(0x15 ^ crc)
+    for i in range(pPEC):
+        crc = calc_crc(buf[i] ^ crc)
+    return crc == buf[pPEC]
+
+def I2C_start():
+    bus.write_quick(sensor_address)
+
+def I2C_stop():
+    bus.write_quick(sensor_address)
+
+def I2C_send1(addr8, cmd):
+    bus.write_byte_data(sensor_address, addr8, cmd)
+
+def I2C_getx(addr8, buff, length):
+    read_data = bus.read_i2c_block_data(sensor_address, addr8, length)
+    for i in range(length):
+        buff[i] = read_data[i]
+
+def D6T_getvalue():
+    I2C_start()
+    I2C_send1(0x14, 0x4C)
+    time.sleep(0.1)  # Allow some time for the sensor to process
+    I2C_getx(0x15, readbuff, 35)
+    I2C_stop()
+
+    if not D6T_checkPEC(readbuff, 4):
+        return -1  # Error
+
+    global tPTAT, tP, tPEC
+    tPTAT = 256 * readbuff[1] + readbuff[0]
+    tP[0] = 256 * readbuff[3] + readbuff[2]  # Only one pixel, so index is 0
+    tPEC = readbuff[34]
+    return 1
+
+def measure():
+    n = 0
+    LOOPLIMIT = 10  # Example loop limit
+    while n < LOOPLIMIT:
+        status = D6T_getvalue()
+        n += 1
+        if status >= 0:
+            break  # Break the loop if successful
+
+    if status < 0:
+        print("Error operation")
+    else:
+        print("Temperature:", tP[0])
+
+# Continuous measurement loop
+while True:
+    measure()
+    time.sleep(1)
