@@ -18,7 +18,7 @@ GPIO.setmode(GPIO.BCM)
 
 TRIG = 4
 ECHO = 17
-distanceToFloor = 208
+distanceToFloor = 286
 distanceMarginal = 10
 
 GPIO.setup(TRIG, GPIO.OUT)
@@ -54,8 +54,9 @@ async def distance_measurement():
     global fade_in_task, fade_out_task, fade_in_triggered, fade_out_triggered
     while True:
         GPIO.output(TRIG, True)
-#        await asyncio.sleep(0.00001)
-        await asyncio.sleep(0.06)
+        await asyncio.sleep(0.00001)
+#        await asyncio.sleep(0.0001)
+#        await asyncio.sleep(0.06)   # 0.06 it was
         GPIO.output(TRIG, False)
 
         pulse_start = time.time()
@@ -76,17 +77,22 @@ async def distance_measurement():
 #        print('Distance:', distance, 'cm')
 
         distances_buffer.append(distance) # Add 5 latest measurements to buffer
-        if len(distances_buffer) > 5:
+        if len(distances_buffer) > 10:
             distances_buffer.pop(0)
 
-        median_distance = sorted(distances_buffer)[len(distances_buffer) // 2] # Take the median measurement
-        print('Median distance:', median_distance, 'cm - Actual distance:', distance, 'cm')
+#        median_distance = distance
+#        median_distance = sorted(distances_buffer)[len(distances_buffer) // 2] # Take the median measurement
+        median_distance = min(distances_buffer)  # Take the lowest value
+#        print('Distance:', distance, 'cm')
+#        print('Median distance:', median_distance, 'cm - Actual distance:', distance, 'cm')
+        print('Shortest distance:', median_distance, 'cm - Actual distance:', distance, 'cm')
 
         if median_distance < (distanceToFloor-distanceMarginal) and not fade_in_triggered:
             fade_in_task = await fade_change_task(fade_in_task, audio_fade_in)
             fade_in_triggered = True
             fade_out_triggered = False
-        elif median_distance >= (distanceToFloor-distanceMarginal) and median_distance < 300 and not fade_out_triggered:
+#        elif median_distance >= (distanceToFloor-distanceMarginal) and median_distance < 300 and not fade_out_triggered:
+        elif median_distance >= (distanceToFloor-distanceMarginal) and not fade_out_triggered:
             fade_out_task = await fade_change_task(fade_out_task, audio_fade_out)
             fade_out_triggered = True
             fade_in_triggered = False
