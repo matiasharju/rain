@@ -29,7 +29,7 @@ print('Waiting for sensor to settle...')
 time.sleep(2)
 print('Sensor ready')
 
-sound = 'rain_umbrella.mp3'
+sound = '/home/vattu/Documents/rain/rain_umbrella.mp3'
 pygame.mixer.init()
 
 try:
