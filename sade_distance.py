@@ -29,13 +29,11 @@ print('Waiting for sensor to settle...')
 time.sleep(2)
 print('Sensor ready')
 
-# sound0 = '/home/vattu/Documents/rain/rain_umbrella.mp3'
-# sound1 = '/home/vattu/Documents/rain/rain_umbrella.mp3'
+sound1 = '/home/vattu/Documents/rain/rain_umbrella.mp3'
+sound2 = '/home/vattu/Documents/rain/rain_umbrella.mp3'
 pygame.mixer.init()
-sound0 = pygame.mixer.Sound('/home/vattu/Documents/rain/rain_umbrella.mp3')
-sound1 = pygame.mixer.Sound('/home/vattu/Documents/rain/rain_umbrella.mp3')
-channel0 = pygame.mixer.Channel(0)
-channel1 = pygame.mixer.Channel(1)
+channel1 = pygame.mixer.Channel(0)
+channel2 = pygame.mixer.Channel(1)
 
 # try:
 #     pygame.mixer.music.load(sound0)
@@ -52,10 +50,10 @@ channel1 = pygame.mixer.Channel(1)
 #     exit(1)
 
 # pygame.mixer.music.play(loops = -1)
-channel0.play(sound0)
-channel0.set_volume(1.0, 0.0)
-channel1.play(sound1)
-channel1.set_volume(0.0, 1.0)
+channel1.play(sound1, loops = -1)
+channel1.set_volume(1.0, 0.0)
+channel2.play(sound2, loops = -1)
+channel2.set_volume(0.0, 1.0)
               
 distances_buffer = []
 
