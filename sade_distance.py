@@ -29,18 +29,34 @@ print('Waiting for sensor to settle...')
 time.sleep(2)
 print('Sensor ready')
 
-sound = '/home/vattu/Documents/rain/rain_umbrella.mp3'
+# sound0 = '/home/vattu/Documents/rain/rain_umbrella.mp3'
+# sound1 = '/home/vattu/Documents/rain/rain_umbrella.mp3'
 pygame.mixer.init()
+sound0 = pygame.mixer.Sound('/home/vattu/Documents/rain/rain_umbrella.mp3')
+sound1 = pygame.mixer.Sound('/home/vattu/Documents/rain/rain_umbrella.mp3')
+channel0 = pygame.mixer.Channel(0)
+channel1 = pygame.mixer.Channel(1)
 
-try:
-    pygame.mixer.music.load(sound)
-    print(sound, 'loaded')
-except pygame.error:
-    print('Failed to load sound:', sound)
-    exit(1)
+# try:
+#     pygame.mixer.music.load(sound0)
+#     print(sound0, 'loaded for channel 1')
+# except pygame.error:
+#     print('Failed to load sound for channel 1:', sound0)
+#     exit(1)
 
-pygame.mixer.music.play(loops = -1)
+# try:
+#     pygame.mixer.music.load(sound1)
+#     print(sound1, 'loaded for channel 2')
+# except pygame.error:
+#     print('Failed to load sound for channel 2:', sound1)
+#     exit(1)
 
+# pygame.mixer.music.play(loops = -1)
+channel0.play(sound0)
+channel0.set_volume(1.0, 0.0)
+channel1.play(sound1)
+channel1.set_volume(0.0, 1.0)
+              
 distances_buffer = []
 
 # Global task variables
@@ -108,13 +124,15 @@ async def audio_fade_in():
 #        pygame.mixer.music.play()
     print('Start fade in.')
     for i in range(0, 100):
-        pygame.mixer.music.set_volume(i / 100)
+        channel0.set_volume(i / 100, 0.0)
+#        pygame.mixer.music.set_volume(i / 100)
         await asyncio.sleep(0.05)
 
 async def audio_fade_out():
     print('Start fade out.')
     for i in range(100, 0, -1):
-        pygame.mixer.music.set_volume(i / 100)
+        channel0.set_volume(i / 100, 0.0)
+#        pygame.mixer.music.set_volume(i / 100)
         await asyncio.sleep(0.05)
 #    pygame.mixer.music.stop()
 
