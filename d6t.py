@@ -1,54 +1,46 @@
+#! /usr/bin/python
+
+# A simple Python command line tool to control an Omron MEMS Temp Sensor D6T-44L
+# By Greg Griffes http://yottametric.com
+# GNU GPL V3 
+
+# Jan 2015
+
 import smbus
-import time
+import sys
+import getopt
+import time 
+import pigpio
 
-# Define I2C bus number (for Raspberry Pi 3 Model A+, it's usually bus 1)
-bus_number = 1
+i2c_bus = smbus.SMBus(3)
+OMRON_1=0x0a 					# 7 bit I2C address of Omron MEMS Temp Sensor D6T-44L
+OMRON_BUFFER_LENGTH=5				# Omron data buffer size
+temperature_data=[0]*OMRON_BUFFER_LENGTH 	# initialize the temperature data list
 
-# Define sensor address
-sensor_address = 0x0A
+# intialize the pigpio library and socket connection to the daemon (pigpiod)
+pi = pigpio.pi()              # use defaults
+version = pi.get_pigpio_version()
+print ('PiGPIO version = '+str(version))
+handle = pi.i2c_open(3, 0x0a) # open Omron D6T device at address 0x0a on bus 1
 
-# Define registers for temperature data
-temperature_register = 0x00
-ambient_temperature_register = 0x02
+# initialize the device based on Omron's appnote 1
+result=i2c_bus.write_byte(OMRON_1,0x4c);
 
-# Create an instance of smbus for I2C communication
-bus = smbus.SMBus(bus_number)
+# azquire reference temp
+(bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
+reference_temp = (256 * temperature_data[1] + temperature_data[0]) * 0.1
+reference_temp_formatted = "{:.1f}".format(reference_temp) # format to fixed bymber of decimals
+print('Reference temp:', reference_temp_formatted)
 
-def read_temperature():
-    # Read temperature data from the sensor
-    data = bus.read_i2c_block_data(sensor_address, temperature_register, 4)
 
-    # Combine the two bytes into a single integer
-    temperature = (data[1] << 8) + data[0]
+while True:
+    # acquire temperature readings
+    (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
+    measured_temp = (256 * temperature_data[3] + temperature_data[2]) * 0.1
+    measured_temp_formatted = "{:.1f}".format(measured_temp) # format to fixed bymber of decimals
+    print('Temp:', measured_temp_formatted)
+    time.sleep(0.2)
 
-    # Convert to Celsius
-    temperature = temperature / 10.0
 
-    return temperature
-
-def read_ambient_temperature():
-    # Read ambient temperature data from the sensor
-    data = bus.read_i2c_block_data(sensor_address, ambient_temperature_register, 2)
-
-    # Combine the two bytes into a single integer
-    ambient_temperature = (data[1] << 8) + data[0]
-
-    # Convert to Celsius
-    ambient_temperature = ambient_temperature / 10.0
-
-    return ambient_temperature
-
-try:
-    while True:
-        # Read temperature
-        temperature = read_temperature()
-        ambient_temperature = read_ambient_temperature()
-
-        print("Object Temperature: {}°C".format(temperature))
-        print("Ambient Temperature: {}°C".format(ambient_temperature))
-
-        # Wait for some time before reading again
-        time.sleep(1)
-
-except KeyboardInterrupt:
-    print("Exiting program")
+pi.i2c_close(handle)
+pi.stop()
