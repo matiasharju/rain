@@ -89,15 +89,32 @@ async def measure():
         # compare temperatures
         if measured_temp >= (threshold_temp_up * 10) and not fade_in_triggered:
             print('Start sound, temp:', measured_temp, 'Threshold:', threshold_temp_up)
-            pygame.mixer.music.set_volume(1)
+            asyncio.create_task(fade_in())
+#            pygame.mixer.music.set_volume(1)
             fade_in_triggered = True
             fade_out_triggered = False
         elif measured_temp < ((threshold_temp_up - threshold_marginal) * 10) and not fade_out_triggered:
             print('Stop sound, temp:', measured_temp_formatted, 'Threshold:', threshold_temp_up)
-            pygame.mixer.music.set_volume(0)
+            asyncio.create_task(fade_out())
+#            pygame.mixer.music.set_volume(0)
             fade_in_triggered = False
             fade_out_triggered = True
 
+async def fade_in():
+    while True:
+        current_volume = pygame.mixer.music.get_volume()
+        print('Fade in')
+        for i in range(int(current_volume) * 100, 100):
+            pygame.mixer.music.set_volume(i/100)
+            await asyncio.sleep(0.05)
+
+async def fade_out():
+    while True:
+        current_volume = pygame.mixer.music.get_volume()
+        print('Fade out')
+        for i in range(int(current_volume) * 100, 0, -1):
+            pygame.mixer.music.set_volume(i/100)
+            await asyncio.sleep(0.05)
 
 try:
     asyncio.run(main())
