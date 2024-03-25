@@ -20,12 +20,12 @@ import getopt
 import time
 import pigpio
 
-threshold_temp_up = 24.4 # above which sound starts to fade in
-threshold_marginal = 0.3  # substracted from temp_up, used for triggering fade out
+threshold_temp_up = 24.6  # above which sound starts to fade in
+threshold_marginal = 0.2  # substracted from temp_up, used for triggering fade out
 
 # **** SOUND ****
 sound = '/home/vattu/Documents/rain/rain_umbrella.mp3'
-pygame.mixer.init()
+pygame.mixer.init(buffer=512)
 
 try:
     pygame.mixer.music.load(sound)
