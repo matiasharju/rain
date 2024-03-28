@@ -21,9 +21,9 @@ import time
 import pigpio
 
 omron_bus = 4             # CHANGE OMRON BUS HERE
-threshold_temp_up = 24.6  # above which sound starts to fade in
-threshold_marginal = 0.2  # substracted from temp_up, used for triggering fade out
-threshold = 5.0             # how many celsius degrees above the reference temperature until triggered
+#threshold_temp_up = 24.6  # above which sound starts to fade in
+#threshold_marginal = 0.2  # substracted from temp_up, used for triggering fade out
+threshold = 4.0             # how many celsius degrees above the reference temperature until triggered
 
 # **** SOUND ****
 sound = '/home/vattu/Documents/rain/rain_umbrella.mp3'
@@ -61,12 +61,12 @@ handle = pi.i2c_open(omron_bus, 0x0a) # open Omron D6T device at address 0x0a
 # initialize the device based on Omron's appnote 1
 result=i2c_bus.write_byte(OMRON_1,0x4c);
 
-# acquire reference temp
-(bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
-print('temperature_data length:', len(temperature_data))
-sensor_temp = (256 * temperature_data[1] + temperature_data[0]) * 0.1
-sensor_temp_formatted = "{:.1f}".format(sensor_temp) # format to fixed bymber of decimals
-print('Sensor temp:', sensor_temp_formatted)
+# acquire sensor temp
+#(bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
+#print('temperature_data length:', len(temperature_data))
+#sensor_temp = (256 * temperature_data[1] + temperature_data[0]) * 0.1
+#sensor_temp_formatted = "{:.1f}".format(sensor_temp) # format to fixed bymber of decimals
+#print('Sensor temp:', sensor_temp_formatted)
 
 
 # **** MAIN COROUTINE ****
@@ -84,6 +84,7 @@ async def measure():
         lock = asyncio.Lock()
         await lock.acquire()
         (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
+        tPTAT = (256 * temperature_data[1] + temperature_data[0])
         tP0 = (256 * temperature_data[3] + temperature_data[2])
         tP1 = (256 * temperature_data[5] + temperature_data[4])
         tP2 = (256 * temperature_data[7] + temperature_data[6])
@@ -111,7 +112,7 @@ async def measure():
         # choose the lowest value for reference temperature
         tRef = min(tP)
         tHi = max(tP)  # highest value of all sensors
-        print('LOWEST (tRef):', "{:.1f}".format(tRef * 0.1), 'HIGHEST:', "{:.1f}".format(tHi * 0.1))
+        print('Sensor temp:', "{:.1f}".format(tPTAT * 0.1), 'LOWEST (tRef):', "{:.1f}".format(tRef * 0.1), 'HIGHEST:', "{:.1f}".format(tHi * 0.1))
 
         # format temperatures for printing
         tPF = []    # list of formatted temperatures
