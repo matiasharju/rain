@@ -109,9 +109,10 @@ async def measure():
         #tRef = sum(lowest_four) / len(lowest_four)          # calculate the average for reference temperature
         #print("Average of the 4 lowest values (tRef):", tRef)
 
-        # choose the lowest value for reference temperature
+        # choose the lowest value of all pixels for reference temperature
+        # TODO: lock the value when values_over_threshold is true, release when false
         tRef = min(tP)
-        tHi = max(tP)  # highest value of all sensors
+        tHi = max(tP)  # highest value of all pixels
         print('Sensor temp:', "{:.1f}".format(tPTAT * 0.1), 'LOWEST (tRef):', "{:.1f}".format(tRef * 0.1), 'HIGHEST:', "{:.1f}".format(tHi * 0.1))
 
         # format temperatures for printing
@@ -124,8 +125,21 @@ async def measure():
         lock.release()
         time.sleep(0.2)
 
-        # check if any of the pixels is above the threshold
-        values_over_threshold = [value for value in tP if value > tRef + (threshold *10)]
+        # Pixel layout of D6T-44L-06 (16ch)
+        #  ----- ----- ----- ----- 
+        # | P0  | P1  | P2  | P3  |
+        #  ----- ----- ----- -----
+        # | P4  | P5  | P6  | P7  |
+        #  ----- ----- ----- -----
+        # | P8  | P9  | P10 | P11 |
+        #  ----- ----- ----- -----
+        # | P12 | P13 | P14 | P15 |
+        #  ----- ----- ----- -----
+
+        # check if any of the temperatures in the selected pixel combination (tS) is above the threshold
+        tS = tP                                 # all pixels
+        #tS = [tP[5], tP[6], tP[9], tP[10]]     # four innermost pixels
+        values_over_threshold = [value for value in tS if value > tRef + (threshold *10)]
         if values_over_threshold:
             print("Temps over the threshold:", values_over_threshold)
         else:
