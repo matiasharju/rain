@@ -27,12 +27,13 @@ threshold = 4.0             # how many celsius degrees above the reference tempe
 
 # **** SOUND ****
 pygame.mixer.pre_init(frequency=48000, size=-16, channels=2, buffer=512)
-pygame.init()
+pygame.mixer.init()
 sound1 = pygame.mixer.Sound('/home/vattu/Documents/rain/rain_umbrella.mp3')
 print (pygame.mixer.get_init())
 
 #pygame.mixer.music.play(loops = -1)
 sound1.play(loops = -1)
+
 
 # **** GLOBAL TASK VARIABLES ****
 fade_task = None
