@@ -32,9 +32,11 @@ print (pygame.mixer.get_init())
 time.sleep(5)
 
 sound1 = pygame.mixer.Sound('/home/vattu/Documents/rain/rain_umbrella.mp3')
+time.sleep(5)
 
 #pygame.mixer.music.play(loops = -1)
 sound1.play(loops = -1)
+time.sleep(5)
 
 
 # **** GLOBAL TASK VARIABLES ****
