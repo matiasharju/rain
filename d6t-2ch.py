@@ -27,6 +27,7 @@ threshold = 4.0             # how many celsius degrees above the reference tempe
 
 # **** SOUND ****
 pygame.mixer.init(buffer=512)
+sound1 = pygame.mixer.Sound('/home/vattu/Documents/rain/rain_umbrella.mp3')
 sound = '/home/vattu/Documents/rain/rain_umbrella.mp3'
 
 try:
@@ -36,8 +37,8 @@ except pygame.error:
     print('Failed to load sound:', sound)
     exit(1)
 
-pygame.mixer.music.play(loops = -1)
-
+#pygame.mixer.music.play(loops = -1)
+sound.play(loops = -1)
 
 # **** GLOBAL TASK VARIABLES ****
 fade_task = None
