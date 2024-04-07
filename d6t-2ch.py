@@ -26,7 +26,8 @@ omron_bus = 4             # CHANGE OMRON BUS HERE
 threshold = 4.0             # how many celsius degrees above the reference temperature until triggered
 
 # **** SOUND ****
-pygame.init(48000)
+pygame.mixer.pre_init(48000)
+pygame.init()
 print (pygame.mixer.get_init())
 time.sleep(5)
 
