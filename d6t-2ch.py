@@ -38,7 +38,7 @@ except pygame.error:
     exit(1)
 
 #pygame.mixer.music.play(loops = -1)
-sound.play(loops = -1)
+sound1.play(loops = -1)
 
 # **** GLOBAL TASK VARIABLES ****
 fade_task = None
