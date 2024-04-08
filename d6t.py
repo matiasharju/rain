@@ -23,7 +23,7 @@ import pigpio
 omron_bus = 4             # CHANGE OMRON BUS HERE
 #threshold_temp_up = 24.6  # above which sound starts to fade in
 #threshold_marginal = 0.2  # substracted from temp_up, used for triggering fade out
-threshold = 4.0             # how many celsius degrees above the reference temperature until triggered
+threshold = 1.0             # how many celsius degrees above the reference temperature until triggered
 
 # **** SOUND ****
 pygame.mixer.init(buffer=512)
