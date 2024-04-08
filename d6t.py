@@ -137,8 +137,8 @@ async def measure():
         #  ----- ----- ----- -----
 
         # check if any of the temperatures in the selected pixel combination (tS) is above the threshold
-        #tS = tP                                 # all pixels
-        tS = [tP[5], tP[6], tP[9], tP[10]]     # four innermost pixels
+        tS = tP                                 # all pixels
+        #tS = [tP[5], tP[6], tP[9], tP[10]]     # four innermost pixels
         values_over_threshold = [value for value in tS if value > tRef + (threshold *10)]
         if values_over_threshold:
             print("Temps over the threshold:", values_over_threshold)
