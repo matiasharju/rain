@@ -20,6 +20,6 @@ panned_left = backgroundMusic.pan(-1.0)
 #Play audio
 while True:
     try:
-        play(panned_right)
+        play(panned_left)
     except KeyboardInterrupt:  # To handle Ctrl+C to exit the loop
         break
