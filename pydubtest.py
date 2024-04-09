@@ -3,7 +3,7 @@ import os
 # Set environment variable for audio device before importing pydub
 os.environ['SDL_AUDIODRIVER'] = 'alsa'
 os.environ['SDL_ALSA_SETDMIXRATE'] = '48000'
-os.environ['SDL_ALSA_CARD'] = 'hw:2,1' # Check that the device number N is right (hw:N,0)!!!
+os.environ['SDL_ALSA_CARD'] = 'hw:2,2' # Check that the device number N is right (hw:N,0)!!!
 
 
 from pydub import AudioSegment
