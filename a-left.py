@@ -48,11 +48,13 @@ async def main():
 async def fade():
     current_volume = pygame.mixer.music.get_volume()
     print('Fade happening...')
-    while True:
-        for i in range(int(current_volume * 100), 100, +1):
-            pygame.mixer.music.set_volume(i / 100)
-            await asyncio.sleep(0.05)
-
+    for i in range(int(current_volume * 100), 100, +1):
+        volume = i / 100
+        pygame.mixer.music.set_volume(volume)
+        await asyncio.sleep(0.05)
+        if volume >= 1.0:
+            break
+    print('Fade complete')
 
 try:
     asyncio.run(main())
