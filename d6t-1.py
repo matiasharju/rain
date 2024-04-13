@@ -16,7 +16,7 @@ import RPi.GPIO as GPIO
 import pygame
 
 # **** SOUND ****
-pygame.mixer.init(buffer=512, channels=2)
+pygame.mixer.init(buffer=2048, channels=2)
 sound = '/home/vattu/Documents/rain/rain_umbrella.mp3'
 
 try:
