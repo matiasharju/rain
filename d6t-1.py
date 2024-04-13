@@ -9,7 +9,7 @@ os.system('sudo chmod g+rw /dev/gpiomem')
 # Set environment variable for audio device before importing pygame
 os.environ['SDL_AUDIODRIVER'] = 'alsa'
 os.environ['SDL_ALSA_SETDMIXRATE'] = '48000'
-os.environ['SDL_ALSA_CARD'] = 'hw:2,0' # Check that the device number N is right (hw:N,0)!!!
+os.environ['SDL_ALSA_CARD'] = 'hw:0,0' # Check that the device number N is right (hw:N,0)!!!
 
 import asyncio
 import RPi.GPIO as GPIO
@@ -17,7 +17,7 @@ import pygame
 
 # **** SOUND ****
 pygame.mixer.init(buffer=2048, channels=2)
-sound = '/home/vattu/Documents/rain/RainMetalRoof_R.mp3'
+sound = '/home/vattu/Documents/rain/RainMetalRoof_L.mp3'
 
 try:
     pygame.mixer.music.load(sound)
