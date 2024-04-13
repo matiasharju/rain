@@ -23,20 +23,20 @@ import pigpio
 omron_bus = 4             # CHANGE OMRON BUS HERE
 #threshold_temp_up = 24.6  # above which sound starts to fade in
 #threshold_marginal = 0.2  # substracted from temp_up, used for triggering fade out
-threshold = 0.8             # how many celsius degrees above the reference temperature until triggered
+threshold = 4.0             # how many celsius degrees above the reference temperature until triggered
 
 # **** SOUND ****
-pygame.mixer.init(buffer=512)
-sound = '/home/vattu/Documents/rain/rain_umbrella.mp3'
+pygame.mixer.pre_init(48000)
+pygame.init()
+print (pygame.mixer.get_init())
+time.sleep(5)
 
-try:
-    pygame.mixer.music.load(sound)
-    print(sound, 'loaded')
-except pygame.error:
-    print('Failed to load sound:', sound)
-    exit(1)
+sound1 = pygame.mixer.Sound('/home/vattu/Documents/rain/rain_umbrella.mp3')
+time.sleep(5)
 
-pygame.mixer.music.play(loops = -1)
+#pygame.mixer.music.play(loops = -1)
+sound1.play(loops = -1)
+time.sleep(5)
 
 
 # **** GLOBAL TASK VARIABLES ****
@@ -138,8 +138,7 @@ async def measure():
 
         # check if any of the temperatures in the selected pixel combination (tS) is above the threshold
         #tS = tP                                 # all pixels
-        #tS = [tP[5], tP[6], tP[9], tP[10]]     # four innermost pixels
-        tS = [tP[0], tP[1], tP[2], tP[4], tP[5], tP[6], tP[8], tP[9], tP[10]]
+        tS = [tP[5], tP[6], tP[9], tP[10]]     # four innermost pixels
         values_over_threshold = [value for value in tS if value > tRef + (threshold *10)]
         if values_over_threshold:
             print("Temps over the threshold:", values_over_threshold)

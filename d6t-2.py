@@ -26,8 +26,8 @@ omron_bus = 4             # CHANGE OMRON BUS HERE
 threshold = 0.8             # how many celsius degrees above the reference temperature until triggered
 
 # **** SOUND ****
-pygame.mixer.init(buffer=512)
-sound = '/home/vattu/Documents/rain/rain_umbrella.mp3'
+pygame.mixer.init(buffer=512, channels=2)
+sound = '/home/vattu/Documents/rain/rain_light.mp3'
 
 try:
     pygame.mixer.music.load(sound)
@@ -47,10 +47,10 @@ fade_in_triggered = None
 fade_out_triggered = None
 
 # **** OMRON ****
-i2c_bus = smbus.SMBus(omron_bus)
-OMRON_1=0x0a 					# 7 bit I2C address of Omron MEMS Temp Sensor D6T-44L
-OMRON_BUFFER_LENGTH=35				# Omron data buffer size
-temperature_data=[0]*OMRON_BUFFER_LENGTH 	# initialize the temperature data list
+#i2c_bus = smbus.SMBus(omron_bus)
+#OMRON_1=0x0a 					# 7 bit I2C address of Omron MEMS Temp Sensor D6T-44L
+#OMRON_BUFFER_LENGTH=35				# Omron data buffer size
+#temperature_data=[0]*OMRON_BUFFER_LENGTH 	# initialize the temperature data list
 
 # intialize the pigpio library and socket connection to the daemon (pigpiod)
 pi = pigpio.pi()              # use defaults
@@ -59,7 +59,7 @@ print ('PiGPIO version = '+str(version))
 handle = pi.i2c_open(omron_bus, 0x0a) # open Omron D6T device at address 0x0a
 
 # initialize the device based on Omron's appnote 1
-result=i2c_bus.write_byte(OMRON_1,0x4c);
+#result=i2c_bus.write_byte(OMRON_1,0x4c);
 
 # acquire sensor temp
 #(bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))

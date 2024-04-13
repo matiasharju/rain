@@ -29,32 +29,18 @@ print('Waiting for sensor to settle...')
 time.sleep(2)
 print('Sensor ready')
 
-sound1 = '/home/vattu/Documents/rain/rain_umbrella.mp3'
-sound2 = '/home/vattu/Documents/rain/rain_umbrella.mp3'
+sound = '/home/vattu/Documents/rain/rain_umbrella.mp3'
 pygame.mixer.init()
-channel1 = pygame.mixer.Channel(0)
-channel2 = pygame.mixer.Channel(1)
 
-# try:
-#     pygame.mixer.music.load(sound0)
-#     print(sound0, 'loaded for channel 1')
-# except pygame.error:
-#     print('Failed to load sound for channel 1:', sound0)
-#     exit(1)
+try:
+    pygame.mixer.music.load(sound)
+    print(sound, 'loaded')
+except pygame.error:
+    print('Failed to load sound:', sound)
+    exit(1)
 
-# try:
-#     pygame.mixer.music.load(sound1)
-#     print(sound1, 'loaded for channel 2')
-# except pygame.error:
-#     print('Failed to load sound for channel 2:', sound1)
-#     exit(1)
+pygame.mixer.music.play(loops = -1)
 
-# pygame.mixer.music.play(loops = -1)
-channel1.play(sound1, loops = -1)
-channel1.set_volume(1.0, 0.0)
-channel2.play(sound2, loops = -1)
-channel2.set_volume(0.0, 1.0)
-              
 distances_buffer = []
 
 # Global task variables
@@ -94,19 +80,17 @@ async def distance_measurement():
         if len(distances_buffer) > 10:
             distances_buffer.pop(0)
 
-#        median_distance = distance
-#        median_distance = sorted(distances_buffer)[len(distances_buffer) // 2] # Take the median measurement
-        median_distance = min(distances_buffer)  # Take the lowest value
-#        print('Distance:', distance, 'cm')
-#        print('Median distance:', median_distance, 'cm - Actual distance:', distance, 'cm')
-        print('Shortest distance:', median_distance, 'cm - Actual distance:', distance, 'cm')
+#        filtered_distance = sorted(distances_buffer)[len(distances_buffer) // 2] # Take the median measurement
+        filtered_distance = min(distances_buffer)  # Take the lowest value
+#        print('Filtered distance:', distance, 'cm')
 
-        if median_distance < (distanceToFloor-distanceMarginal) and not fade_in_triggered:
+        if (filtered_distance < (distanceToFloor-distanceMarginal) or filtered_distance > 9000) and not fade_in_triggered:
+            print('Filtered distance to trigger fade in:', filtered_distance)
             fade_in_task = await fade_change_task(fade_in_task, audio_fade_in)
             fade_in_triggered = True
             fade_out_triggered = False
-#        elif median_distance >= (distanceToFloor-distanceMarginal) and median_distance < 300 and not fade_out_triggered:
-        elif median_distance >= (distanceToFloor-distanceMarginal) and not fade_out_triggered:
+        elif (distanceToFloor-distanceMarginal) <= filtered_distance <= 9000 and not fade_out_triggered:
+            print('Filtered distance to trigger fade out:', filtered_distance)
             fade_out_task = await fade_change_task(fade_out_task, audio_fade_out)
             fade_out_triggered = True
             fade_in_triggered = False
@@ -118,21 +102,20 @@ async def fade_change_task(current_task, new_task_func):
     return asyncio.create_task(new_task_func())
 
 async def audio_fade_in():
-#    if not pygame.mixer.music.get_busy():
-#        pygame.mixer.music.play()
     print('Start fade in.')
-    for i in range(0, 100):
-        channel0.set_volume(i / 100, 0.0)
-#        pygame.mixer.music.set_volume(i / 100)
+    currentVolume = pygame.mixer.music.get_volume()
+    for i in range(int(currentVolume * 100), 100):
+        pygame.mixer.music.set_volume(i / 100)
+#        print(pygame.mixer.music.get_volume())
         await asyncio.sleep(0.05)
 
 async def audio_fade_out():
     print('Start fade out.')
-    for i in range(100, 0, -1):
-        channel0.set_volume(i / 100, 0.0)
-#        pygame.mixer.music.set_volume(i / 100)
+    currentVolume = pygame.mixer.music.get_volume()
+    for i in range(int(currentVolume * 100), 0, -1):
+        pygame.mixer.music.set_volume(i / 100)
+#        print(pygame.mixer.music.get_volume())
         await asyncio.sleep(0.05)
-#    pygame.mixer.music.stop()
 
 async def main():
     asyncio.create_task(distance_measurement())
