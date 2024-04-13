@@ -17,7 +17,7 @@ import pygame
 
 # **** SOUND ****
 pygame.mixer.init(buffer=2048, channels=2)
-sound = '/home/vattu/Documents/rain/RainMetalRoof_L.mp3'
+sound = '/home/vattu/Documents/rain/RainMetalRoof_R.mp3'
 
 try:
     pygame.mixer.music.load(sound)
