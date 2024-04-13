@@ -26,6 +26,7 @@ except pygame.error:
     print('Failed to load sound:', sound)
     exit(1)
 
+pygame.mixer.music.set_volume(0)
 pygame.mixer.music.play(loops = -1)
 
 
@@ -39,8 +40,19 @@ fade_out_triggered = None
 
 # **** MAIN COROUTINE ****
 async def main():
+    asyncio.create_task(fade())
     while True:
        await asyncio.sleep(1) # to keep the main coroutine running
+
+# **** FADE LOOP ****
+async def fade():
+    current_volume = pygame.mixer.music.get_volume()
+    print('Fade happening...')
+    while True:
+        for i in range(int(current_volume) * 100, 0):
+            pygame.mixer.music.set_volume(i/100)
+            await asyncio.sleep(0.05)
+
 
 try:
     asyncio.run(main())
