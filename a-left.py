@@ -51,6 +51,7 @@ async def fade():
     while True:
         for i in range(int(current_volume) * 100, 0):
             pygame.mixer.music.set_volume(i/100)
+            i ++ 1
             await asyncio.sleep(0.05)
 
 
