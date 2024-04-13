@@ -26,7 +26,8 @@ omron_bus = 4             # CHANGE OMRON BUS HERE
 threshold = 0.8             # how many celsius degrees above the reference temperature until triggered
 
 # **** SOUND ****
-pygame.mixer.init(buffer=512, channels=2)
+pygame.mixer.pre_init(frequency=48000, buffer=2048)
+pygame.mixer.init()
 sound = '/home/vattu/Documents/rain/rain_umbrella.mp3'
 
 try:
