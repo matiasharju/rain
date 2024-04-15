@@ -96,7 +96,7 @@ async def fade_out():
 
 # **** MEASURE LOOP ****
 async def measure():
-    global fade_task, fade_in_task, fade_out_task, fade_in_triggered, fade_out_triggered, tP, tPF, tRef
+    global fade_in_task, fade_out_task, fade_in_triggered, fade_out_triggered, tP, tPF, tRef
     while True:
         # acquire temperature readings
         global temperature_data
@@ -168,25 +168,29 @@ async def measure():
 
         if values_over_threshold and not fade_in_triggered:
             fade_in_triggered = True
+            print('fade_in_triggered:', fade_in_triggered)
             fade_out_triggered = False
+            print('fade_out_triggered:', fade_out_triggered)
             if fade_out_task:
                 try:
                     fade_out_task.cancel()
                 except asyncio.CancelledError:
                     pass
             fade_in_task = asyncio.create_task(fade_in())
-            print('VALUES OVER THRESHOLD')
+            print('Values OVER threshold')
 #            pygame.mixer.music.set_volume(1)
         elif not values_over_threshold and not fade_out_triggered:
             fade_in_triggered = False
+            print('fade_in_triggered:', fade_in_triggered)
             fade_out_triggered = True
+            print('fade_out_triggered:', fade_out_triggered)
             if fade_in_task:
                 try:
                     fade_in_task.cancel()
                 except asyncio.CancelledError:
                     pass
             fade_out_task = asyncio.create_task(fade_out())
-            print('                                      VALUES UNDER THRESHOLD')
+            print('Values UNDER threshold')
 #            pygame.mixer.music.set_volume(0)
 
 # **** MAIN COROUTINE ****
