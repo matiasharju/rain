@@ -42,6 +42,8 @@ pygame.mixer.music.play(loops = -1)
 # **** GLOBAL TASK VARIABLES ****
 fade_in_task = None
 fade_out_task = None
+fade_in_triggered = False
+fade_out_triggered = False
 
 # **** OMRON ****
 i2c_bus = smbus.SMBus(omron_bus)
