@@ -20,10 +20,11 @@ import getopt
 import time
 import pigpio
 
-omron_bus = 4             # CHANGE OMRON I2C BUS HERE
+omron_bus = 3             # CHANGE OMRON I2C BUS HERE
 #threshold_temp_up = 24.6  # above which sound starts to fade in
 #threshold_marginal = 0.2  # substracted from temp_up, used for triggering fade out
-threshold = 0.8             # how many celsius degrees above the reference temperature until triggered
+#threshold = 0.8             # how many celsius degrees above the reference temperature until triggered
+threshold = 1.5             # how many celsius degrees above the reference temperature until triggered
 
 # **** SOUND ****
 pygame.mixer.init(buffer=2048, channels=2)
@@ -36,14 +37,8 @@ except pygame.error:
     print('Failed to load sound:', sound)
     exit(1)
 
+pygame.mixer.music.set_volume(0.0)
 pygame.mixer.music.play(loops = -1)
-
-
-# **** GLOBAL TASK VARIABLES ****
-fade_in_task = None
-fade_out_task = None
-fade_in_triggered = False
-fade_out_triggered = False
 
 # **** OMRON ****
 i2c_bus = smbus.SMBus(omron_bus)
@@ -68,15 +63,9 @@ result=i2c_bus.write_byte(OMRON_1,0x4c);
 #print('Sensor temp:', sensor_temp_formatted)
 
 
-# **** MAIN COROUTINE ****
-async def main():
-    asyncio.create_task(measure())
-    while True:
-        await asyncio.sleep(1) # to keep the main coroutine running
-
 # **** MEASURE LOOP ****
 async def measure():
-    global fade_task, fade_in_task, fade_out_task, fade_in_triggered, fade_out_triggered, tP, tPF, tRef
+    global tP, tPF, tRef
     while True:
         # acquire temperature readings
         global temperature_data
@@ -146,51 +135,34 @@ async def measure():
             print("No temps are over the threshold")
 
 
-        if values_over_threshold and not fade_in_triggered:
-            fade_in_triggered = True
-            fade_out_triggered = False
-#            if fade_out_task:
-#                try:
-#                    fade_out_task.cancel()
-#                except asyncio.CancelledError:
-#                    pass
-#            fade_in_task = asyncio.create_task(fade_in())
-            pygame.mixer.music.set_volume(1)
-        elif not values_over_threshold and not fade_out_triggered:
-            fade_in_triggered = False
-            fade_out_triggered = True
-#            if fade_in_task:
-#                try:
-#                    fade_in_task.cancel()
-#                except asyncio.CancelledError:
-#                    pass
-#            fade_out_task = asyncio.create_task(fade_out())
-            pygame.mixer.music.set_volume(0)
+        if values_over_threshold and pygame.mixer.music.get_volume() < 1.0:
+            print('Fade up happening...')
+            current_volume = pygame.mixer.music.get_volume()
+            pygame.mixer.music.set_volume(current_volume + 0.05)
+            await asyncio.sleep(0.01)
+
+        elif not values_over_threshold and pygame.mixer.music.get_volume() > 0.0:
+            if pygame.mixer.music.get_volume() > 0.1:
+                print('Fade down happening...')
+                current_volume = pygame.mixer.music.get_volume()
+                pygame.mixer.music.set_volume(current_volume - 0.02)
+                await asyncio.sleep(0.01)
+            elif pygame.mixer.music.get_volume() <= 0.1:
+                print('Slower fade down happening...')
+                current_volume = pygame.mixer.music.get_volume()
+                pygame.mixer.music.set_volume(current_volume - 0.001)
+                await asyncio.sleep(0.01)
+        
+        print('Volume:', pygame.mixer.music.get_volume())
 
 
-# **** FADE UP ****
-async def fade_in():
-    current_volume = pygame.mixer.music.get_volume()
-    print('Fade up happening...')
-    for i in range(int(current_volume * 100), 100, +1):
-        volume = i / 100
-        pygame.mixer.music.set_volume(volume)
-        await asyncio.sleep(0.05)
-        if volume >= 0.98:
-            break
-    print('Fade complete')
+# **** MAIN COROUTINE ****
+async def main():
+    asyncio.create_task(measure())
+    while True:
+        await asyncio.sleep(1) # to keep the main coroutine running
 
-# **** FADE DOWN ****
-async def fade_out():
-    current_volume = pygame.mixer.music.get_volume()
-    print('Fade down happening...')
-    for i in range(int(current_volume * 100), 0, -1):
-        volume = i / 100
-        pygame.mixer.music.set_volume(volume)
-        await asyncio.sleep(0.05)
-        if volume <= 0.02:
-            break
-    print('Fade complete')
+
 
 try:
     asyncio.run(main())
