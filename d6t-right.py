@@ -159,7 +159,7 @@ async def measure():
             fade_in_task = asyncio.create_task(fade_in())
 #            pygame.mixer.music.set_volume(1)
         elif not values_over_threshold and not fade_out_triggered:
-            print('VALUES NOT OVER THRESHOLD')
+            print('                                      VALUES NOT OVER THRESHOLD')
             fade_in_triggered = False
             fade_out_triggered = True
             if fade_in_task:
