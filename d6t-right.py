@@ -178,13 +178,13 @@ async def measure():
         if values_over_threshold and pygame.mixer.music.get_volume() < 1.0:
             print('Fade up happening...')
             current_volume = pygame.mixer.music.get_volume()
-            pygame.mixer.music.set_volume(current_volume + 0.01)
+            pygame.mixer.music.set_volume(current_volume + 0.03)
             await asyncio.sleep(0.01)
 
         elif not values_over_threshold and pygame.mixer.music.get_volume() > 0.0:
             print('Fade down happening...')
             current_volume = pygame.mixer.music.get_volume()
-            pygame.mixer.music.set_volume(current_volume - 0.01)
+            pygame.mixer.music.set_volume(current_volume - 0.02)
             await asyncio.sleep(0.01)
 
 # **** MAIN COROUTINE ****
