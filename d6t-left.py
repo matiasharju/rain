@@ -163,7 +163,7 @@ async def measure():
 
 
 # **** FADE UP ****
-async def fade_in()):
+async def fade_in():
     current_volume = pygame.mixer.music.get_volume()
     print('Fade up happening...')
     for i in range(int(current_volume * 100), 100, +1):
