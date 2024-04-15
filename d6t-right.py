@@ -71,28 +71,37 @@ result=i2c_bus.write_byte(OMRON_1,0x4c);
 #print('Sensor temp:', sensor_temp_formatted)
 
 # **** FADE UP ****
+
 async def fade_in():
-    current_volume = pygame.mixer.music.get_volume()
-    print('Fade up happening...')
-    for i in range(int(current_volume * 100), 100, +1):
-        volume = i / 100
-        pygame.mixer.music.set_volume(volume)
-        await asyncio.sleep(0.05)
-        if volume >= 0.98:
-            break
-    print('Fade complete')
+    try:
+        print('Entering fade_in() coroutine')
+        current_volume = pygame.mixer.music.get_volume()
+        print('Fade up happening...')
+        for i in range(int(current_volume * 100), 100, +1):
+            volume = i / 100
+            pygame.mixer.music.set_volume(volume)
+            await asyncio.sleep(0.05)
+            if volume >= 0.98:
+                break
+        print('Fade complete')
+    except Exception as e:
+        print(f"Error in fade_in(): {e}")
 
 # **** FADE DOWN ****
 async def fade_out():
-    current_volume = pygame.mixer.music.get_volume()
-    print('Fade down happening...')
-    for i in range(int(current_volume * 100), 0, -1):
-        volume = i / 100
-        pygame.mixer.music.set_volume(volume)
-        await asyncio.sleep(0.05)
-        if volume <= 0.02:
-            break
-    print('Fade complete')
+    try:
+        current_volume = pygame.mixer.music.get_volume()
+        print('Fade down happening...')
+        for i in range(int(current_volume * 100), 0, -1):
+            volume = i / 100
+            pygame.mixer.music.set_volume(volume)
+            await asyncio.sleep(0.05)
+            if volume <= 0.02:
+                break
+        print('Fade complete')
+    except Exception as e:
+        print(f"Error in fade_out(): {e}")
+
 
 # **** MEASURE LOOP ****
 async def measure():
