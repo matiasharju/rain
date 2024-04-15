@@ -191,6 +191,8 @@ async def measure():
                 current_volume = pygame.mixer.music.get_volume()
                 pygame.mixer.music.set_volume(current_volume - 0.005)
                 await asyncio.sleep(0.01)
+        
+        print('Volume:', pygame.mixer.music.get_volume())
 
 
 # **** MAIN COROUTINE ****
