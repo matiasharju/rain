@@ -175,34 +175,17 @@ async def measure():
             print("No temps are over the threshold")
 
 
-        if values_over_threshold and not fade_in_triggered:
-            fade_in_triggered = True
-            print('fade_in_triggered:', fade_in_triggered)
-            fade_out_triggered = False
-            print('fade_out_triggered:', fade_out_triggered)
-            if fade_out_task:
-                try:
-                    fade_out_task.cancel()
-                except asyncio.CancelledError:
-                    pass
-            fade_in_task = asyncio.create_task(fade_in())
-            await asyncio.sleep(0.1)
-            print("Fade-in task created:", fade_in_task)
-#            pygame.mixer.music.set_volume(1)
-        elif not values_over_threshold and not fade_out_triggered:
-            fade_in_triggered = False
-            print('fade_in_triggered:', fade_in_triggered)
-            fade_out_triggered = True
-            print('fade_out_triggered:', fade_out_triggered)
-            if fade_in_task:
-                try:
-                    fade_in_task.cancel()
-                except asyncio.CancelledError:
-                    pass
-            fade_out_task = asyncio.create_task(fade_out())
-            await asyncio.sleep(0.1)
-            print("Fade-out task created:", fade_out_task)
-#            pygame.mixer.music.set_volume(0)
+        if values_over_threshold and pygame.mixer.music.get_volume() < 1.0:
+            print('Fade up happening...')
+            current_volume = pygame.mixer.music.get_volume()
+            pygame.mixer.music.set_volume(current_volume + 0.01)
+            await asyncio.sleep(0.05)
+
+        elif not values_over_threshold and pygame.mixer.music.get_volume() > 0.0:
+            print('Fade down happening...')
+            current_volume = pygame.mixer.music.get_volume()
+            pygame.mixer.music.set_volume(current_volume - 0.01)
+            await asyncio.sleep(0.05)
 
 # **** MAIN COROUTINE ****
 async def main():
