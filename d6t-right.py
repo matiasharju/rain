@@ -150,23 +150,23 @@ async def measure():
         if values_over_threshold and not fade_in_triggered:
             fade_in_triggered = True
             fade_out_triggered = False
-#            if fade_out_task:
-#                try:
-#                    fade_out_task.cancel()
-#                except asyncio.CancelledError:
-#                    pass
-#            fade_in_task = asyncio.create_task(fade_in())
-            pygame.mixer.music.set_volume(1)
+            if fade_out_task:
+                try:
+                    fade_out_task.cancel()
+                except asyncio.CancelledError:
+                    pass
+            fade_in_task = asyncio.create_task(fade_in())
+#            pygame.mixer.music.set_volume(1)
         elif not values_over_threshold and not fade_out_triggered:
             fade_in_triggered = False
             fade_out_triggered = True
-#            if fade_in_task:
-#                try:
-#                    fade_in_task.cancel()
-#                except asyncio.CancelledError:
-#                    pass
-#            fade_out_task = asyncio.create_task(fade_out())
-            pygame.mixer.music.set_volume(0)
+            if fade_in_task:
+                try:
+                    fade_in_task.cancel()
+                except asyncio.CancelledError:
+                    pass
+            fade_out_task = asyncio.create_task(fade_out())
+#            pygame.mixer.music.set_volume(0)
 
 
 # **** FADE UP ****
