@@ -28,7 +28,7 @@ threshold = 1.5             # how many celsius degrees above the reference tempe
 
 # **** SOUND ****
 pygame.mixer.init(buffer=2048, channels=2)
-sound = '/home/vattu/Documents/rain/RainMetalRoof_L.mp3'
+sound = '/home/vattu/Documents/rain/RainGlass_L.mp3'
 
 try:
     pygame.mixer.music.load(sound)
