@@ -23,7 +23,8 @@ import pigpio
 omron_bus = 4             # CHANGE OMRON I2C BUS HERE
 #threshold_temp_up = 24.6  # above which sound starts to fade in
 #threshold_marginal = 0.2  # substracted from temp_up, used for triggering fade out
-threshold = 0.8             # how many celsius degrees above the reference temperature until triggered
+#threshold = 0.8             # how many celsius degrees above the reference temperature until triggered
+threshold = 1.5             # how many celsius degrees above the reference temperature until triggered
 
 # **** SOUND ****
 pygame.mixer.init(buffer=2048, channels=2)
@@ -36,8 +37,8 @@ except pygame.error:
     print('Failed to load sound:', sound)
     exit(1)
 
+pygame.mixer.music.set_volume(0.0)
 pygame.mixer.music.play(loops = -1)
-
 
 # **** OMRON ****
 i2c_bus = smbus.SMBus(omron_bus)
@@ -153,6 +154,14 @@ async def measure():
                 await asyncio.sleep(0.01)
         
         print('Volume:', pygame.mixer.music.get_volume())
+
+
+# **** MAIN COROUTINE ****
+async def main():
+    asyncio.create_task(measure())
+    while True:
+        await asyncio.sleep(1) # to keep the main coroutine running
+
 
 
 try:
