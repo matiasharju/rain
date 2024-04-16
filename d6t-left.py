@@ -111,7 +111,7 @@ async def measure():
         print(tPF[0], tPF[1], tPF[2], tPF[3], tPF[4], tPF[5], tPF[6], tPF[7], tPF[8], tPF[9], tPF[10], tPF[11], tPF[12], tPF[13], tPF[14], tPF[15])
 
         lock.release()
-        time.sleep(0.2)
+        time.sleep(0.05)
 
         # Pixel layout of D6T-44L-06 (16ch)
         #  ----- ----- ----- -----
@@ -145,13 +145,13 @@ async def measure():
             if pygame.mixer.music.get_volume() > 0.1:
                 print('Fade down happening...')
                 current_volume = pygame.mixer.music.get_volume()
-                pygame.mixer.music.set_volume(current_volume - 0.02)
-                await asyncio.sleep(0.01)
+                pygame.mixer.music.set_volume(current_volume - 0.01)
+#                await asyncio.sleep(0.01)
             elif pygame.mixer.music.get_volume() <= 0.1:
                 print('Slower fade down happening...')
                 current_volume = pygame.mixer.music.get_volume()
                 pygame.mixer.music.set_volume(current_volume - 0.001)
-                await asyncio.sleep(0.01)
+#                await asyncio.sleep(0.01)
         
         print('Volume:', pygame.mixer.music.get_volume())
 
