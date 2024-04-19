@@ -28,7 +28,7 @@ threshold = 1.5             # how many celsius degrees above the reference tempe
 
 # **** SOUND ****
 pygame.mixer.init(buffer=2048, channels=2)
-sound = '/home/vattu/Documents/rain/RainMde_R.mp3'
+sound = '/home/vattu/Documents/rain/RainMade_R.mp3'
 
 try:
     pygame.mixer.music.load(sound)
@@ -72,7 +72,7 @@ async def measure():
         lock = asyncio.Lock()
         await lock.acquire()
         (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
-        tPTAT = (256 * temperature_data[1] + temperature_data[0])
+#        tPTAT = (256 * temperature_data[1] + temperature_data[0])
         tP0 = (256 * temperature_data[3] + temperature_data[2])
         tP1 = (256 * temperature_data[5] + temperature_data[4])
         tP2 = (256 * temperature_data[7] + temperature_data[6])
@@ -101,7 +101,8 @@ async def measure():
         # TODO: lock the value when values_over_threshold is true, release when false
         tRef = min(tP)
         tHi = max(tP)  # highest value of all pixels
-        print('Sensor temp:', "{:.1f}".format(tPTAT * 0.1), 'LOWEST (tRef):', "{:.1f}".format(tRef * 0.1), 'HIGHEST:', "{:.1f}".format(tHi * 0.1))
+#        print('Sensor temp:', "{:.1f}".format(tPTAT * 0.1), 'LOWEST (tRef):', "{:.1f}".format(tRef * 0.1), 'HIGHEST:', "{:.1f}".format(tHi * 0.1))
+        print('LOWEST (tRef):', "{:.1f}".format(tRef * 0.1), 'HIGHEST:', "{:.1f}".format(tHi * 0.1))
 
         # format temperatures for printing
         tPF = []    # list of formatted temperatures
