@@ -1,8 +1,8 @@
 #! /usr/bin/python
 
-# This script reads the temperature data from Omron D6T-44L-06 sensor and triggers a sound when the temperature rises above a certain threshold.
+# TMaxs script reads the temperature data from Omron D6T-44L-06 sensor and triggers a sound when the temperature rises above a certain threshold.
 # The sound is faded in when the temperature rises above the threshold and faded out when the temperature drops below the threshold.
-# The threshold is calculated based on the reference temperature which is the lowest temperature of all pixels.
+# The threshold is calculated based on the reference temperature which is the average over time of the lowest temperature of all pixels.
 
 import os
 
@@ -23,6 +23,8 @@ import sys
 import getopt
 import time
 import pigpio
+import csv
+from datetime import datetime
 
 omron_bus = 4             # CHANGE OMRON I2C BUS HERE
 #threshold_temp_up = 24.6  # above which sound starts to fade in
@@ -59,13 +61,9 @@ handle = pi.i2c_open(omron_bus, 0x0a) # open Omron D6T device at address 0x0a
 # initialize the device based on Omron's appnote 1
 result=i2c_bus.write_byte(OMRON_1,0x4c);
 
-# acquire sensor temp
-#(bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
-#print('temperature_data length:', len(temperature_data))
-#sensor_temp = (256 * temperature_data[1] + temperature_data[0]) * 0.1
-#sensor_temp_formatted = "{:.1f}".format(sensor_temp) # format to fixed bymber of decimals
-#print('Sensor temp:', sensor_temp_formatted)
-
+# **** VARIABLES ****
+last_record_time = time.time()
+tAverage = 0
 
 # **** MEASURE LOOP ****
 async def measure():
@@ -95,18 +93,10 @@ async def measure():
         tP15 = (256 * temperature_data[33] + temperature_data[32])
         tP = [tP0, tP1, tP2, tP3, tP4, tP5, tP6, tP7, tP8, tP9, tP10, tP11, tP12, tP13, tP14, tP15]
 
-        # measure reference temperature by averaging the 4 lowest values of all 16 pixels
-        #sorted_tP = sorted(tP)                              # sort the list in ascending order
-        #lowest_four = sorted_tP[:4]                         # take the 4 lowest values
-        #tRef = sum(lowest_four) / len(lowest_four)          # calculate the average for reference temperature
-        #print("Average of the 4 lowest values (tRef):", tRef)
-
         # choose the lowest value of all pixels for reference temperature
-        # TODO: lock the value when values_over_threshold is true, release when false
         tRef = min(tP)
-        tHi = max(tP)  # highest value of all pixels
-#        print('Sensor temp:', "{:.1f}".format(tPTAT * 0.1), 'LOWEST (tRef):', "{:.1f}".format(tRef * 0.1), 'HIGHEST:', "{:.1f}".format(tHi * 0.1))
-        print('LOWEST (tRef):', "{:.1f}".format(tRef * 0.1), 'HIGHEST:', "{:.1f}".format(tHi * 0.1))
+        tMax = max(tP)  # highest value of all pixels
+        print('LOWEST (tRef):', "{:.1f}".format(tRef * 0.1), 'HIGHEST:', "{:.1f}".format(tMax * 0.1))
 
         # format temperatures for printing
         tPF = []    # list of formatted temperatures
@@ -129,11 +119,20 @@ async def measure():
         # | P12 | P13 | P14 | P15       |
         #  ----- ----- ----- -----
 
+        # record reference temperature every minute
+        current_time = time.time()
+        if current_time - last_record_time >= 60:
+            record_reference_temperature()
+            calculate_average_temperature()
+            last_record_time = current_time
+        print(f'Average temperature: {tAverage:.2f}')
+
         # check if any of the temperatures in the selected pixel combination (tS) is above the threshold
         #tS = tP                                 # all pixels
         #tS = [tP[5], tP[6], tP[9], tP[10]]     # four innermost pixels
         tS = [tP[0], tP[1], tP[2], tP[4], tP[5], tP[6], tP[8], tP[9], tP[10]]
-        values_over_threshold = [value for value in tS if value > tRef + (threshold *10)]
+        #values_over_threshold = [value for value in tS if value > tRef + (threshold *10)]
+        values_over_threshold = [value for value in tS if value > tAverage + (threshold *10)]
         if values_over_threshold:
             print("Temps over the threshold:", values_over_threshold)
         else:
@@ -167,6 +166,36 @@ async def main():
     while True:
         await asyncio.sleep(1) # to keep the main coroutine running
 
+
+# **** Record reference temperature ****
+def record_reference_temperature():
+    # Get current timestamp
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    # Save temperature and timestamp to file
+    with open('temperature_data_R.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([timestamp, tRef])
+
+
+# **** Calculate average temperature ****
+def calculate_average_temperature():
+    total_temperature = 0
+    num_readings = 0
+
+    # Read temperature data from file and calculate total temperature and number of readings
+    with open('temperature_data_R.csv', 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            total_temperature += float(row[1])
+            num_readings += 1
+
+    # Calculate average temperature
+    if num_readings > 0:
+        tAverage = total_temperature / num_readings
+        print(f'Average temperature: {tAverage:.2f}')
+    else:
+        print('No average temperatures available')
 
 
 try:

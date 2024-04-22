@@ -1,5 +1,9 @@
 #! /usr/bin/python
 
+# This script reads the temperature data from Omron D6T-44L-06 sensor and triggers a sound when the temperature rises above a certain threshold.
+# The sound is faded in when the temperature rises above the threshold and faded out when the temperature drops below the threshold.
+# The threshold is calculated based on the reference temperature which is the lowest temperature of all pixels.
+
 import os
 
 # Set /dev/gpiomem the correct permissions
