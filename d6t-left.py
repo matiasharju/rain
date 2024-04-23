@@ -69,30 +69,50 @@ result=i2c_bus.write_byte(OMRON_1,0x4c);
 
 # **** MEASURE LOOP ****
 async def measure():
-    global tP, tPF, tRef
+    global tP, tPF, tRef, temperature_data
     while True:
         # acquire temperature readings
-        global temperature_data
         lock = asyncio.Lock()
         await lock.acquire()
-        (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
-#        tPTAT = (256 * temperature_data[1] + temperature_data[0])
-        tP0 = (256 * temperature_data[3] + temperature_data[2])
-        tP1 = (256 * temperature_data[5] + temperature_data[4])
-        tP2 = (256 * temperature_data[7] + temperature_data[6])
-        tP3 = (256 * temperature_data[9] + temperature_data[8])
-        tP4 = (256 * temperature_data[11] + temperature_data[10])
-        tP5 = (256 * temperature_data[13] + temperature_data[12])
-        tP6 = (256 * temperature_data[15] + temperature_data[14])
-        tP7 = (256 * temperature_data[17] + temperature_data[16])
-        tP8 = (256 * temperature_data[19] + temperature_data[18])
-        tP9 = (256 * temperature_data[21] + temperature_data[20])
-        tP10 = (256 * temperature_data[23] + temperature_data[22])
-        tP11 = (256 * temperature_data[25] + temperature_data[24])
-        tP12 = (256 * temperature_data[27] + temperature_data[26])
-        tP13 = (256 * temperature_data[29] + temperature_data[28])
-        tP14 = (256 * temperature_data[31] + temperature_data[30])
-        tP15 = (256 * temperature_data[33] + temperature_data[32])
+
+        temperature_data = []
+        while len(temperature_data) < OMRON_BUFFER_LENGTH:
+            remaining_bytes = OMRON_BUFFER_LENGTH - len(temperature_data)
+            chunk_size = min(16, remaining_bytes)
+            try:
+                (bytes_read, temperature_data_chunk) = pi.i2c_read_device(handle, chunk_size)
+                if bytes_read != chunk_size:
+                    print("Incomplete I2C read. Expected:", chunk_size, "bytes. Received:", bytes_read, "bytes.")
+                    continue
+                temperature_data.extend(temperature_data_chunk)
+            except Exception as e:
+                print("I2C read error:", e)
+                continue
+        
+        #(bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
+        
+        try:
+            #tPTAT = (256 * temperature_data[1] + temperature_data[0])
+            tP0 = (256 * temperature_data[3] + temperature_data[2])
+            tP1 = (256 * temperature_data[5] + temperature_data[4])
+            tP2 = (256 * temperature_data[7] + temperature_data[6])
+            tP3 = (256 * temperature_data[9] + temperature_data[8])
+            tP4 = (256 * temperature_data[11] + temperature_data[10])
+            tP5 = (256 * temperature_data[13] + temperature_data[12])
+            tP6 = (256 * temperature_data[15] + temperature_data[14])
+            tP7 = (256 * temperature_data[17] + temperature_data[16])
+            tP8 = (256 * temperature_data[19] + temperature_data[18])
+            tP9 = (256 * temperature_data[21] + temperature_data[20])
+            tP10 = (256 * temperature_data[23] + temperature_data[22])
+            tP11 = (256 * temperature_data[25] + temperature_data[24])
+            tP12 = (256 * temperature_data[27] + temperature_data[26])
+            tP13 = (256 * temperature_data[29] + temperature_data[28])
+            tP14 = (256 * temperature_data[31] + temperature_data[30])
+            tP15 = (256 * temperature_data[33] + temperature_data[32])
+        except Exception as e:
+            print("Error processing temperature data:", e)
+            continue
+
         tP = [tP0, tP1, tP2, tP3, tP4, tP5, tP6, tP7, tP8, tP9, tP10, tP11, tP12, tP13, tP14, tP15]
 
         # measure reference temperature by averaging the 4 lowest values of all 16 pixels
@@ -113,10 +133,11 @@ async def measure():
         for i in range(0, len(tP)):
             tPF.append("{:.1f}".format(tP[i] * 0.1))     # format to fixed number of decimals
 #        measured_temp_formatted = "{:.1f}".format(measured_temp * 0.1) # format to fixed bymber of decimals
-        print(tPF[0], tPF[1], tPF[2], tPF[3], tPF[4], tPF[5], tPF[6], tPF[7], tPF[8], tPF[9], tPF[10], tPF[11], tPF[12], tPF[13], tPF[14], tPF[15])
+        #print(tPF[0], tPF[1], tPF[2], tPF[3], tPF[4], tPF[5], tPF[6], tPF[7], tPF[8], tPF[9], tPF[10], tPF[11], tPF[12], tPF[13], tPF[14], tPF[15])
 
         lock.release()
-        time.sleep(0.05)
+        #time.sleep(0.05)
+        await asyncio.sleep(0.05)
 
         # Pixel layout of D6T-44L-06 (16ch)
         #  ----- ----- ----- -----
@@ -136,24 +157,24 @@ async def measure():
         values_over_threshold = [value for value in tS if value > tRef + (threshold *10)]
         if values_over_threshold:
             print("Temps over the threshold:", values_over_threshold)
-        else:
-            print("No temps are over the threshold")
+        #else:
+        #    print("No temps are over the threshold")
 
 
         if values_over_threshold and pygame.mixer.music.get_volume() < 1.0:
-            print('Fade up happening...')
+            #print('Fade up happening...')
             current_volume = pygame.mixer.music.get_volume()
             pygame.mixer.music.set_volume(current_volume + 0.05)
             await asyncio.sleep(0.01)
 
         elif not values_over_threshold and pygame.mixer.music.get_volume() > 0.0:
             if pygame.mixer.music.get_volume() > 0.1:
-                print('Fade down happening...')
+                #print('Fade down happening...')
                 current_volume = pygame.mixer.music.get_volume()
                 pygame.mixer.music.set_volume(current_volume - 0.01)
 #                await asyncio.sleep(0.01)
             elif pygame.mixer.music.get_volume() <= 0.1:
-                print('Slower fade down happening...')
+                #print('Slower fade down happening...')
                 current_volume = pygame.mixer.music.get_volume()
                 pygame.mixer.music.set_volume(current_volume - 0.001)
 #                await asyncio.sleep(0.01)
