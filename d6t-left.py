@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-# This script reads the temperature data from Omron D6T-44L-06 sensor and triggers a sound when the temperature rises above a certain threshold.
+# TMaxs script reads the temperature data from Omron D6T-44L-06 sensor and triggers a sound when the temperature rises above a certain threshold.
 # The sound is faded in when the temperature rises above the threshold and faded out when the temperature drops below the threshold.
 # The threshold is calculated based on the reference temperature which is the lowest temperature of all pixels.
 
@@ -28,7 +28,7 @@ omron_bus = 3             # CHANGE OMRON I2C BUS HERE
 #threshold_temp_up = 24.6  # above which sound starts to fade in
 #threshold_marginal = 0.2  # substracted from temp_up, used for triggering fade out
 #threshold = 0.8             # how many celsius degrees above the reference temperature until triggered
-threshold = 1.8             # how many celsius degrees above the reference temperature until triggered
+threshold = 1.7             # how many celsius degrees above the reference temperature until triggered
 
 # **** SOUND ****
 pygame.mixer.init(buffer=2048, channels=2)
@@ -104,9 +104,9 @@ async def measure():
         # choose the lowest value of all pixels for reference temperature
         # TODO: lock the value when values_over_threshold is true, release when false
         tRef = min(tP)
-        tHi = max(tP)  # highest value of all pixels
-#        print('Sensor temp:', "{:.1f}".format(tPTAT * 0.1), 'LOWEST (tRef):', "{:.1f}".format(tRef * 0.1), 'HIGHEST:', "{:.1f}".format(tHi * 0.1))
-        print('LEFT - LOWEST (tRef):', "{:.1f}".format(tRef * 0.1), 'HIGHEST:', "{:.1f}".format(tHi * 0.1), 'DIFFERENCE:', "{:.1f}".format((tHi - tRef) * 0.1))
+        tMax = max(tP)  # highest value of all pixels
+#        print('Sensor temp:', "{:.1f}".format(tPTAT * 0.1), 'LOWEST (tRef):', "{:.1f}".format(tRef * 0.1), 'HIGHEST:', "{:.1f}".format(tMax * 0.1))
+        print('LEFT - LOWEST (tRef):', "{:.1f}".format(tRef * 0.1), 'HIGHEST:', "{:.1f}".format(tMax * 0.1), 'DIFFERENCE:', "{:.1f}".format((tMax - tRef) * 0.1))
 
         # format temperatures for printing
         tPF = []    # list of formatted temperatures

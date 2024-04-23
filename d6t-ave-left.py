@@ -30,7 +30,7 @@ omron_bus = 3             # CHANGE OMRON I2C BUS HERE
 #threshold_temp_up = 24.6  # above which sound starts to fade in
 #threshold_marginal = 0.2  # substracted from temp_up, used for triggering fade out
 #threshold = 0.8             # how many celsius degrees above the reference temperature until triggered
-threshold = 1.8             # how many celsius degrees above the reference temperature until triggered
+threshold = 1.7             # how many celsius degrees above the reference temperature until triggered
 
 # **** SOUND ****
 pygame.mixer.init(buffer=2048, channels=2)
@@ -67,7 +67,7 @@ tAverage = 0
 
 # **** MEASURE LOOP ****
 async def measure():
-    global tP, tPF, tRef
+    global tP, tPF, tRef, last_record_time
     while True:
         # acquire temperature readings
         global temperature_data
@@ -96,7 +96,7 @@ async def measure():
         # choose the lowest value of all pixels for reference temperature
         tRef = min(tP)
         tMax = max(tP)  # highest value of all pixels
-        print('LEFT - LOWEST (tRef):', "{:.1f}".format(tRef * 0.1), 'HIGHEST:', "{:.1f}".format(tHi * 0.1), 'DIFFERENCE:', "{:.1f}".format((tHi - tRef) * 0.1))
+        print('LEFT - LOWEST (tRef):', "{:.1f}".format(tRef * 0.1), 'HIGHEST:', "{:.1f}".format(tMax * 0.1), 'DIFFERENCE:', "{:.1f}".format((tMax - tRef) * 0.1))
 
         # format temperatures for printing
         tPF = []    # list of formatted temperatures
@@ -193,7 +193,7 @@ def calculate_average_temperature():
     # Calculate average temperature
     if num_readings > 0:
         tAverage = total_temperature / num_readings
-        print(f'Average temperature: {tAverage:.2f}')
+        print(f'Average temperature calculated: {tAverage:.2f}')
     else:
         print('No average temperatures available')
 
