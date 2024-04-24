@@ -174,8 +174,8 @@ async def measure():
         values_over_threshold = [value for value in tS if value > (tAverage * 10) + (threshold *10)]
         if values_over_threshold:
             print("Temps over the threshold:", values_over_threshold)
-        else:
-            print("No temps are over the threshold")
+#        else:
+#            print("No temps are over the threshold")
 
 
         if values_over_threshold and pygame.mixer.music.get_volume() < 1.0:
