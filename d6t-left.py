@@ -94,7 +94,7 @@ async def measure():
             if bytes_read != OMRON_BUFFER_LENGTH:
                 print("Incomplete I2C read. Expected:", OMRON_BUFFER_LENGTH, "bytes. Received:", bytes_read, "bytes.")
                 continue  # Skip processing incomplete data
-        except Exception as e:
+        except (IOError, BrokenPipeError) as e:
             print("I2C read error:", e)
             # Release the lock to avoid deadlock
             lock.release()
@@ -102,6 +102,8 @@ async def measure():
             await asyncio.sleep(0.1)
             # Reacquire the lock before retrying
             await lock.acquire()
+        except Exception as e:
+            print("I2C read error:", e)
             continue  # Skip processing in case of error
 
 #        (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
