@@ -129,7 +129,7 @@ async def measure():
         # choose the lowest value of all pixels for reference temperature
         tRef = min(tP)
         tMax = max(tP)  # highest value of all pixels
-        print('LEFT - MIN:', "{:.1f}".format(tRef * 0.1), 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format((tMax - tRef) * 0.1), 'AVE:', tAverage, 'VOL:', pygame.mixer.music.get_volume())
+        print('LEFT - MIN:', "{:.1f}".format(tRef * 0.1), f'AVE: {tAverage:.1f}', 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format((tMax - tRef) * 0.1), 'VOL:', pygame.mixer.music.get_volume())
 
         # format temperatures for printing
         tPF = []    # list of formatted temperatures
