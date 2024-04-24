@@ -45,7 +45,7 @@ except pygame.error:
     print('Failed to load sound:', sound)
     exit(1)
 
-pygame.mixer.music.set_volume(1.0)  #test sound
+pygame.mixer.music.set_volume(0.3)  #test sound
 pygame.mixer.music.play(loops = -1)
 
 time.sleep(1)   #test sound for 1 second
