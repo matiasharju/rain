@@ -208,11 +208,13 @@ def record_reference_temperature():
     # Save temperature and timestamp to file
     with open('temperature_data_L.csv', 'a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow([timestamp, tRef])
+        writer.writerow([timestamp, "{:.1f}".format(tRef * 0.1)])
 
 
 # **** Calculate average temperature ****
 def calculate_average_temperature():
+    global tAverage
+
     total_temperature = 0
     num_readings = 0
 
