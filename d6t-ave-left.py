@@ -26,7 +26,7 @@ import pigpio
 import csv
 from datetime import datetime
 
-time.sleep(10)
+#time.sleep(10)
 
 omron_bus = 3             # CHANGE OMRON I2C BUS HERE
 #threshold_temp_up = 24.6  # above which sound starts to fade in
@@ -65,7 +65,7 @@ result=i2c_bus.write_byte(OMRON_1,0x4c);
 
 # **** VARIABLES ****
 last_record_time = time.time()
-tAverage = 25.4
+tAverage = 24.5
 
 # **** MAIN COROUTINE ****
 async def main():
