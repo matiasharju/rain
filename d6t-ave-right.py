@@ -26,11 +26,11 @@ import pigpio
 import csv
 from datetime import datetime
 
-omron_bus = 4             # CHANGE OMRON I2C BUS HERE
+omron_bus = 3             # CHANGE OMRON I2C BUS HERE
 #threshold_temp_up = 24.6  # above which sound starts to fade in
 #threshold_marginal = 0.2  # substracted from temp_up, used for triggering fade out
 #threshold = 0.8             # how many celsius degrees above the reference temperature until triggered
-threshold = 1.5             # how many celsius degrees above the reference temperature until triggered
+threshold = 1.0             # how many celsius degrees above the reference temperature until triggered
 
 # **** SOUND ****
 pygame.mixer.init(buffer=2048, channels=2)
@@ -63,18 +63,51 @@ result=i2c_bus.write_byte(OMRON_1,0x4c);
 
 # **** VARIABLES ****
 last_record_time = time.time()
-tAverage = 0
+tAverage = 25.8
 
 # **** MEASURE LOOP ****
 async def measure():
-    global tP, tPF, tRef
+    global tP, tPF, tRef, last_record_time
     while True:
         # acquire temperature readings
         global temperature_data
         lock = asyncio.Lock()
         await lock.acquire()
-        (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
-#        tPTAT = (256 * temperature_data[1] + temperature_data[0])
+
+#        temperature_data = []
+#        while len(temperature_data) < OMRON_BUFFER_LENGTH:
+#            remaining_bytes = OMRON_BUFFER_LENGTH - len(temperature_data)
+#            chunk_size = min(16, remaining_bytes)
+#            try:
+#                (bytes_read, temperature_data_chunk) = pi.i2c_read_device(handle, chunk_size)
+#                if bytes_read != chunk_size:
+#                    print("Incomplete I2C read. Expected:", chunk_size, "bytes. Received:", bytes_read, "bytes.")
+#                    continue
+#                temperature_data.extend(temperature_data_chunk)
+#           except Exception as e:
+#               print("I2C read error:", e)
+#               continue
+        
+        try:
+            (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
+            if bytes_read != OMRON_BUFFER_LENGTH:
+                print("Incomplete I2C read. Expected:", OMRON_BUFFER_LENGTH, "bytes. Received:", bytes_read, "bytes.")
+                continue  # Skip processing incomplete data
+        except (IOError, BrokenPipeError) as e:
+            print("I2C read error:", e)
+            # Release the lock to avoid deadlock
+            lock.release()
+            # Delay before trying again to avoid busy waiting
+            await asyncio.sleep(0.1)
+            # Reacquire the lock before retrying
+            await lock.acquire()
+        except Exception as e:
+            print("I2C read error:", e)
+            continue  # Skip processing in case of error
+
+#        (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
+        
+        #        tPTAT = (256 * temperature_data[1] + temperature_data[0])
         tP0 = (256 * temperature_data[3] + temperature_data[2])
         tP1 = (256 * temperature_data[5] + temperature_data[4])
         tP2 = (256 * temperature_data[7] + temperature_data[6])
@@ -96,14 +129,14 @@ async def measure():
         # choose the lowest value of all pixels for reference temperature
         tRef = min(tP)
         tMax = max(tP)  # highest value of all pixels
-        print('LOWEST (tRef):', "{:.1f}".format(tRef * 0.1), 'HIGHEST:', "{:.1f}".format(tMax * 0.1))
+        print('RIGHT - MIN:', "{:.1f}".format(tRef * 0.1), f'AVE: {tAverage:.1f}', 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format((tMax - tRef) * 0.1), 'VOL:', pygame.mixer.music.get_volume())
 
         # format temperatures for printing
         tPF = []    # list of formatted temperatures
         for i in range(0, len(tP)):
             tPF.append("{:.1f}".format(tP[i] * 0.1))     # format to fixed number of decimals
 #        measured_temp_formatted = "{:.1f}".format(measured_temp * 0.1) # format to fixed bymber of decimals
-        print(tPF[0], tPF[1], tPF[2], tPF[3], tPF[4], tPF[5], tPF[6], tPF[7], tPF[8], tPF[9], tPF[10], tPF[11], tPF[12], tPF[13], tPF[14], tPF[15])
+#        print(tPF[0], tPF[1], tPF[2], tPF[3], tPF[4], tPF[5], tPF[6], tPF[7], tPF[8], tPF[9], tPF[10], tPF[11], tPF[12], tPF[13], tPF[14], tPF[15])
 
         lock.release()
         time.sleep(0.05)
@@ -125,14 +158,14 @@ async def measure():
             record_reference_temperature()
             calculate_average_temperature()
             last_record_time = current_time
-        print(f'Average temperature: {tAverage:.2f}')
+#        print(f'Average temperature: {tAverage:.2f}')
 
         # check if any of the temperatures in the selected pixel combination (tS) is above the threshold
-        #tS = tP                                 # all pixels
+        tS = tP                                 # all pixels
         #tS = [tP[5], tP[6], tP[9], tP[10]]     # four innermost pixels
-        tS = [tP[0], tP[1], tP[2], tP[4], tP[5], tP[6], tP[8], tP[9], tP[10]]
+        #tS = [tP[0], tP[1], tP[2], tP[4], tP[5], tP[6], tP[8], tP[9], tP[10]]
         #values_over_threshold = [value for value in tS if value > tRef + (threshold *10)]
-        values_over_threshold = [value for value in tS if value > tAverage + (threshold *10)]
+        values_over_threshold = [value for value in tS if value > (tAverage * 10) + (threshold *10)]
         if values_over_threshold:
             print("Temps over the threshold:", values_over_threshold)
         else:
@@ -140,24 +173,24 @@ async def measure():
 
 
         if values_over_threshold and pygame.mixer.music.get_volume() < 1.0:
-            print('Fade up happening...')
+#            print('Fade up happening...')
             current_volume = pygame.mixer.music.get_volume()
             pygame.mixer.music.set_volume(current_volume + 0.05)
             await asyncio.sleep(0.01)
 
         elif not values_over_threshold and pygame.mixer.music.get_volume() > 0.0:
             if pygame.mixer.music.get_volume() > 0.1:
-                print('Fade down happening...')
+#                print('Fade down happening...')
                 current_volume = pygame.mixer.music.get_volume()
                 pygame.mixer.music.set_volume(current_volume - 0.01)
 #                await asyncio.sleep(0.01)
             elif pygame.mixer.music.get_volume() <= 0.1:
-                print('Slower fade down happening...')
+#                print('Slower fade down happening...')
                 current_volume = pygame.mixer.music.get_volume()
                 pygame.mixer.music.set_volume(current_volume - 0.001)
 #                await asyncio.sleep(0.01)
         
-        print('Volume:', pygame.mixer.music.get_volume())
+#        print('Volume:', pygame.mixer.music.get_volume())
 
 
 # **** MAIN COROUTINE ****
@@ -175,11 +208,13 @@ def record_reference_temperature():
     # Save temperature and timestamp to file
     with open('temperature_data_R.csv', 'a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow([timestamp, tRef])
+        writer.writerow([timestamp, "{:.1f}".format(tRef * 0.1)])
 
 
 # **** Calculate average temperature ****
 def calculate_average_temperature():
+    global tAverage
+
     total_temperature = 0
     num_readings = 0
 
@@ -193,7 +228,7 @@ def calculate_average_temperature():
     # Calculate average temperature
     if num_readings > 0:
         tAverage = total_temperature / num_readings
-        print(f'Average temperature: {tAverage:.2f}')
+        print(f'Average temperature calculated: {tAverage:.2f}')
     else:
         print('No average temperatures available')
 
