@@ -129,7 +129,7 @@ async def measure():
         # choose the lowest value of all pixels for reference temperature
         tRef = min(tP)
         tMax = max(tP)  # highest value of all pixels
-        print('LEFT - LOWEST (tRef):', "{:.1f}".format(tRef * 0.1), 'HIGHEST:', "{:.1f}".format(tMax * 0.1), 'DIFFERENCE:', "{:.1f}".format((tMax - tRef) * 0.1))
+        print('LEFT - MIN:', "{:.1f}".format(tRef * 0.1), 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format((tMax - tRef) * 0.1), 'AVE:', tAverage, 'VOL:', pygame.mixer.music.get_volume())
 
         # format temperatures for printing
         tPF = []    # list of formatted temperatures
@@ -158,7 +158,7 @@ async def measure():
             record_reference_temperature()
             calculate_average_temperature()
             last_record_time = current_time
-        print(f'Average temperature: {tAverage:.2f}')
+#        print(f'Average temperature: {tAverage:.2f}')
 
         # check if any of the temperatures in the selected pixel combination (tS) is above the threshold
         tS = tP                                 # all pixels
@@ -173,24 +173,24 @@ async def measure():
 
 
         if values_over_threshold and pygame.mixer.music.get_volume() < 1.0:
-            print('Fade up happening...')
+#            print('Fade up happening...')
             current_volume = pygame.mixer.music.get_volume()
             pygame.mixer.music.set_volume(current_volume + 0.05)
             await asyncio.sleep(0.01)
 
         elif not values_over_threshold and pygame.mixer.music.get_volume() > 0.0:
             if pygame.mixer.music.get_volume() > 0.1:
-                print('Fade down happening...')
+#                print('Fade down happening...')
                 current_volume = pygame.mixer.music.get_volume()
                 pygame.mixer.music.set_volume(current_volume - 0.01)
 #                await asyncio.sleep(0.01)
             elif pygame.mixer.music.get_volume() <= 0.1:
-                print('Slower fade down happening...')
+#                print('Slower fade down happening...')
                 current_volume = pygame.mixer.music.get_volume()
                 pygame.mixer.music.set_volume(current_volume - 0.001)
 #                await asyncio.sleep(0.01)
         
-        print('Volume:', pygame.mixer.music.get_volume())
+#        print('Volume:', pygame.mixer.music.get_volume())
 
 
 # **** MAIN COROUTINE ****
