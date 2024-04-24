@@ -30,7 +30,7 @@ omron_bus = 3             # CHANGE OMRON I2C BUS HERE
 #threshold_temp_up = 24.6  # above which sound starts to fade in
 #threshold_marginal = 0.2  # substracted from temp_up, used for triggering fade out
 #threshold = 0.8             # how many celsius degrees above the reference temperature until triggered
-threshold = 1.7             # how many celsius degrees above the reference temperature until triggered
+threshold = 1.0             # how many celsius degrees above the reference temperature until triggered
 
 # **** SOUND ****
 pygame.mixer.init(buffer=2048, channels=2)
@@ -154,7 +154,7 @@ async def measure():
 
         # record reference temperature every minute
         current_time = time.time()
-        if current_time - last_record_time >= 10:
+        if current_time - last_record_time >= 60:
             record_reference_temperature()
             calculate_average_temperature()
             last_record_time = current_time
