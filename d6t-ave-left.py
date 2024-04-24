@@ -70,8 +70,6 @@ result=i2c_bus.write_byte(OMRON_1,0x4c);
 last_record_time = time.time()
 tAverage = 24.5
 
-os.system('python /home/vattu/Documents/rain/d6t-ave-right.py &')
-
 # **** MAIN COROUTINE ****
 async def main():
     asyncio.create_task(measure())
