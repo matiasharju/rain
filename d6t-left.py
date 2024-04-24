@@ -89,7 +89,16 @@ async def measure():
 #               print("I2C read error:", e)
 #               continue
         
-        (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
+        try:
+            (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
+            if bytes_read != OMRON_BUFFER_LENGTH:
+                print("Incomplete data read. Expected:", OMRON_BUFFER_LENGTH, "bytes. Received:", bytes_read, "bytes.")
+                continue  # Skip processing incomplete data
+        except Exception as e:
+            print("Error reading data:", e)
+            continue  # Skip processing in case of error
+
+#        (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
         
         try:
             #tPTAT = (256 * temperature_data[1] + temperature_data[0])
