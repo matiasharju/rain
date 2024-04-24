@@ -63,7 +63,7 @@ result=i2c_bus.write_byte(OMRON_1,0x4c);
 
 # **** VARIABLES ****
 last_record_time = time.time()
-tAverage = 258
+tAverage = 25.8
 
 # **** MEASURE LOOP ****
 async def measure():
