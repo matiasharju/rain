@@ -26,7 +26,7 @@ import pigpio
 import csv
 from datetime import datetime
 
-omron_bus = 3             # CHANGE OMRON I2C BUS HERE
+omron_bus = 4             # CHANGE OMRON I2C BUS HERE
 #threshold_temp_up = 24.6  # above which sound starts to fade in
 #threshold_marginal = 0.2  # substracted from temp_up, used for triggering fade out
 #threshold = 0.8             # how many celsius degrees above the reference temperature until triggered
