@@ -65,6 +65,12 @@ result=i2c_bus.write_byte(OMRON_1,0x4c);
 last_record_time = time.time()
 tAverage = 25.8
 
+# **** MAIN COROUTINE ****
+async def main():
+    asyncio.create_task(measure())
+    while True:
+        await asyncio.sleep(1) # to keep the main coroutine running
+
 # **** MEASURE LOOP ****
 async def measure():
     global tP, tPF, tRef, last_record_time
@@ -192,12 +198,6 @@ async def measure():
         
 #        print('Volume:', pygame.mixer.music.get_volume())
 
-
-# **** MAIN COROUTINE ****
-async def main():
-    asyncio.create_task(measure())
-    while True:
-        await asyncio.sleep(1) # to keep the main coroutine running
 
 
 # **** Record reference temperature ****
