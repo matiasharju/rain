@@ -7,13 +7,13 @@
 import os
 
 # Set /dev/gpiomem the correct permissions
-os.system('sudo chown root.gpio /dev/gpiomem')
-os.system('sudo chmod g+rw /dev/gpiomem')
+#os.system('sudo chown root.gpio /dev/gpiomem')
+#os.system('sudo chmod g+rw /dev/gpiomem')
 
 # Set environment variable for audio device before importing pygame
-os.environ['SDL_AUDIODRIVER'] = 'alsa'
-os.environ['SDL_ALSA_SETDMIXRATE'] = '48000'
-os.environ['SDL_ALSA_CARD'] = 'hw:0,0' # Check that the device number N is right (hw:N,0)!!!
+#os.environ['SDL_AUDIODRIVER'] = 'alsa'
+#os.environ['SDL_ALSA_SETDMIXRATE'] = '48000'
+#os.environ['SDL_ALSA_CARD'] = 'hw:0,0' # Check that the device number N is right (hw:N,0)!!!
 
 import asyncio
 import RPi.GPIO as GPIO
