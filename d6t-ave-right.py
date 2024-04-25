@@ -214,9 +214,10 @@ def record_reference_temperature():
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     # Save temperature and timestamp to file
-    with open('temperature_data_R.csv', 'a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow([timestamp, "{:.1f}".format(tRef * 0.1)])
+    if tRef < 300:  # record only valid temperatures
+        with open('temperature_data_R.csv', 'a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([timestamp, "{:.1f}".format(tRef * 0.1)])
 
 
 # **** Calculate average temperature ****
