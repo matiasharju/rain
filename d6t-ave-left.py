@@ -68,7 +68,7 @@ result=i2c_bus.write_byte(OMRON_1,0x4c);
 
 # **** VARIABLES ****
 last_record_time = time.time()
-tAverage = 23.6
+tAverage = 21.0
 
 # **** MAIN COROUTINE ****
 async def main():
