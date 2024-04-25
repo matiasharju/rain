@@ -15,3 +15,14 @@ if not is_process_running(leftScript):
 
 if not is_process_running(rightScript):
     subprocess.Popen(['python', '/home/vattu/Documents/rain/' + rightScript])
+
+try:
+    # Keep the main script running until interrupted by Ctrl+C
+    while True:
+        pass
+except KeyboardInterrupt:
+    # Handle keyboard interrupt (Ctrl+C) to gracefully terminate subprocesses
+    if is_process_running(leftScript):
+        subprocess.Popen(['pkill', '-f', leftScript])
+    if is_process_running(rightScript):
+        subprocess.Popen(['pkill', '-f', rightScript])
