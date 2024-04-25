@@ -72,18 +72,18 @@ tAverage = 21.0
 
 # **** TEMPERATURE VARIABLES ****
 # Number of measurements to keep in the rolling window
-WINDOW_SIZE = 180
+#WINDOW_SIZE = 180
 
 # ***** READ TEMPERATURE DATA INTO MEMORY  
 # Load the last 180 measurements from the CSV file into memory
-temperature_data = collections.deque(maxlen=WINDOW_SIZE)
-with open('temperature_data_R.csv', 'r') as file:
-    reader = csv.reader(file)
-    # Skip header if present
-    next(reader, None)
-    # Read the last 180 measurements from the file
-    for row in reader:
-        temperature_data.append(float(row[1]))
+#temperature_data = collections.deque(maxlen=WINDOW_SIZE)
+#with open('temperature_data_R.csv', 'r') as file:
+#    reader = csv.reader(file)
+#    # Skip header if present
+#    next(reader, None)
+#    # Read the last 180 measurements from the file
+#    for row in reader:
+#        temperature_data.append(float(row[1]))
 
 
 
