@@ -121,6 +121,8 @@ async def measure():
             if bytes_read != OMRON_BUFFER_LENGTH:
                 print("Incomplete I2C read. Expected:", OMRON_BUFFER_LENGTH, "bytes. Received:", bytes_read, "bytes.")
                 lock.release()  # Release the lock before continuing
+                await asyncio.sleep(0.1)    # Delay before trying again to avoid busy waiting
+                await lock.acquire()        # Reacquire the lock before retrying
                 continue  # Skip processing incomplete data
         except Exception as e:
             print("I2C read error:", e)
