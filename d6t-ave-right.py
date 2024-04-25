@@ -77,7 +77,7 @@ WINDOW_SIZE = 180
 # ***** READ TEMPERATURE DATA INTO MEMORY  
 # Load the last 180 measurements from the CSV file into memory
 temperature_data = collections.deque(maxlen=WINDOW_SIZE)
-with open('temperature_data.csv', 'r') as file:
+with open('temperature_data_R.csv', 'r') as file:
     reader = csv.reader(file)
     # Skip header if present
     next(reader, None)
