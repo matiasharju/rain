@@ -25,15 +25,20 @@ import time
 import pigpio
 import csv
 from datetime import datetime
+import config
 
 omron_bus = 4             # CHANGE OMRON I2C BUS HERE
 #threshold_temp_up = 24.6  # above which sound starts to fade in
 #threshold_marginal = 0.2  # substracted from temp_up, used for triggering fade out
-threshold = 1.5             # how many celsius degrees above the reference temperature until triggered
+#threshold = 1.5             # how many celsius degrees above the reference temperature until triggered
+threshold = config.threshold
 
 # **** SOUND ****
 pygame.mixer.init(buffer=2048, channels=2)
-sound = '/home/vattu/Documents/rain/ReunaR.mp3'
+if config.right == 'keski':
+    sound = '/home/vattu/Documents/rain/KeskiR.mp3'
+else:
+    sound = '/home/vattu/Documents/rain/ReunaR.mp3'
 
 try:
     pygame.mixer.music.load(sound)
