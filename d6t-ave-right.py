@@ -70,22 +70,6 @@ result=i2c_bus.write_byte(OMRON_1,0x4c);
 last_record_time = time.time()
 tAverage = 21.0
 
-# **** TEMPERATURE VARIABLES ****
-# Number of measurements to keep in the rolling window
-#WINDOW_SIZE = 180
-
-# ***** READ TEMPERATURE DATA INTO MEMORY  
-# Load the last 180 measurements from the CSV file into memory
-#temperature_data = collections.deque(maxlen=WINDOW_SIZE)
-#with open('temperature_data_R.csv', 'r') as file:
-#    reader = csv.reader(file)
-#    # Skip header if present
-#    next(reader, None)
-#    # Read the last 180 measurements from the file
-#    for row in reader:
-#        temperature_data.append(float(row[1]))
-
-
 
 # **** MAIN COROUTINE ****
 async def main():
@@ -232,32 +216,27 @@ def record_reference_temperature():
         with open('temperature_data_R.csv', 'a', newline='') as file:
             writer = csv.writer(file)
             writer.writerow([timestamp, "{:.1f}".format(tRef * 0.1)])
-
-    temperature_data.append("{:.1f}".format(tRef * 0.1))  # Add the new temperature to the rolling window
-
+            
 # **** Calculate average temperature ****
 def calculate_average_temperature():
     global tAverage
 
-    if len(temperature_data) > 0:
-        tAverage = sum(temperature_data) / len(temperature_data)
+    total_temperature = 0
+    num_readings = 0
 
-#    total_temperature = 0
-#    num_readings = 0
+    # Read temperature data from file and calculate total temperature and number of readings
+    with open('temperature_data_R.csv', 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            total_temperature += float(row[1])
+            num_readings += 1
 
-#    # Read temperature data from file and calculate total temperature and number of readings
-#    with open('temperature_data_R.csv', 'r') as file:
-#        reader = csv.reader(file)
-#        for row in reader:
-#            total_temperature += float(row[1])
-#            num_readings += 1
-
-#    # Calculate average temperature
-#    if num_readings > 0:
-#        tAverage = total_temperature / num_readings
-#        print(f'Average temperature calculated: {tAverage:.2f}')
-#    else:
-#        print('No average temperatures available')
+    # Calculate average temperature
+    if num_readings > 0:
+        tAverage = total_temperature / num_readings
+        print(f'Average temperature calculated: {tAverage:.2f}')
+    else:
+        print('No average temperatures available')
 
 
 try:
