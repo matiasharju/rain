@@ -26,8 +26,6 @@ import pigpio
 import csv
 from datetime import datetime
 
-#time.sleep(10)
-
 omron_bus = 3             # CHANGE OMRON I2C BUS HERE
 #threshold_temp_up = 24.6  # above which sound starts to fade in
 #threshold_marginal = 0.2  # substracted from temp_up, used for triggering fade out
@@ -199,8 +197,6 @@ async def measure():
         
 #        print('Volume:', pygame.mixer.music.get_volume())
 
-
-
 # **** Record reference temperature ****
 def record_reference_temperature():
     # Get current timestamp
@@ -211,7 +207,6 @@ def record_reference_temperature():
         with open('temperature_data_L.csv', 'a', newline='') as file:
             writer = csv.writer(file)
             writer.writerow([timestamp, "{:.1f}".format(tRef * 0.1)])
-
 
 # **** Calculate average temperature ****
 def calculate_average_temperature():

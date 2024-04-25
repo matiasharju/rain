@@ -26,8 +26,6 @@ import pigpio
 import csv
 from datetime import datetime
 
-#time.sleep(15)
-
 omron_bus = 4             # CHANGE OMRON I2C BUS HERE
 #threshold_temp_up = 24.6  # above which sound starts to fade in
 #threshold_marginal = 0.2  # substracted from temp_up, used for triggering fade out
@@ -68,7 +66,6 @@ result=i2c_bus.write_byte(OMRON_1,0x4c);
 # **** VARIABLES ****
 last_record_time = time.time()
 tAverage = 21.0
-
 
 # **** MAIN COROUTINE ****
 async def main():
@@ -111,7 +108,6 @@ async def measure():
             await asyncio.sleep(0.1)    # Delay before trying again to avoid busy waiting
             await lock.acquire()        # Reacquire the lock before retrying
             continue
-
 
 #        (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
         
@@ -200,10 +196,6 @@ async def measure():
 #                await asyncio.sleep(0.01)
         
 #        print('Volume:', pygame.mixer.music.get_volume())
-
-
-
-
 
 # **** Record reference temperature ****
 def record_reference_temperature():
