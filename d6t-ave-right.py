@@ -152,7 +152,8 @@ async def measure():
 #        print(tPF[0], tPF[1], tPF[2], tPF[3], tPF[4], tPF[5], tPF[6], tPF[7], tPF[8], tPF[9], tPF[10], tPF[11], tPF[12], tPF[13], tPF[14], tPF[15])
 
         lock.release()
-        time.sleep(0.05)
+#        time.sleep(0.05)
+        await asyncio.sleep(0.01)
 
         # Pixel layout of D6T-44L-06 (16ch)
         #  ----- ----- ----- -----
