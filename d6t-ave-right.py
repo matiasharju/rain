@@ -25,7 +25,6 @@ import time
 import pigpio
 import csv
 from datetime import datetime
-import collections
 
 #time.sleep(15)
 
