@@ -1,6 +1,9 @@
 import subprocess
 import psutil
 
+subprocess.run(['sudo', 'killall', 'pigpiod'])
+subprocess.run(['sudo', 'pigpiod', '-t', '0'])
+
 def is_process_running(process_name):
     for process in psutil.process_iter(['pid', 'name']):
         if process.info['name'] == process_name:
