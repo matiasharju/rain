@@ -80,7 +80,7 @@ async def main():
 
 # **** MEASURE LOOP ****
 async def measure():
-    global tP, tPF, tRef, last_record_time
+    global tP, tPF, tRef, last_record_time, pi, handle
     while True:
         # acquire temperature readings
         global temperature_data
