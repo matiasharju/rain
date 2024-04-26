@@ -114,6 +114,9 @@ async def measure():
             await lock.acquire()        # Reacquire the lock before retrying
             continue
 
+        print('Right data:', temperature_data)
+
+
 #        (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
         
         #        tPTAT = (256 * temperature_data[1] + temperature_data[0])
