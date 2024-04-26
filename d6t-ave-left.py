@@ -87,8 +87,11 @@ async def measure():
         lock = asyncio.Lock()
         await lock.acquire()
 
-        # Read data in chunks of 16 bytes
-        temperature_data = []
+
+
+        # Read data in chunks of 16 bytes, v.2
+        temperature_data = bytearray()  # Use bytearray to store binary data
+
         while len(temperature_data) < OMRON_BUFFER_LENGTH:
             remaining_bytes = OMRON_BUFFER_LENGTH - len(temperature_data)
             chunk_size = min(16, remaining_bytes)
@@ -99,8 +102,23 @@ async def measure():
                     continue
                 temperature_data.extend(temperature_data_chunk)
             except Exception as e:
-               print("I2C read error:", e)
-               continue
+                print("I2C read error:", e)
+                continue
+
+#        # Read data in chunks of 16 bytes, v.1 (not working)
+#        temperature_data = []
+#        while len(temperature_data) < OMRON_BUFFER_LENGTH:
+#            remaining_bytes = OMRON_BUFFER_LENGTH - len(temperature_data)
+#            chunk_size = min(16, remaining_bytes)
+#            try:
+#                (bytes_read, temperature_data_chunk) = pi.i2c_read_device(handle, chunk_size)
+#                if bytes_read != chunk_size:
+#                    print("Incomplete I2C read. Expected:", chunk_size, "bytes. Received:", bytes_read, "bytes.")
+#                    continue
+#                temperature_data.extend(temperature_data_chunk)
+#            except Exception as e:
+#               print("I2C read error:", e)
+#               continue
 
 #        try:
 #            (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
@@ -150,8 +168,8 @@ async def measure():
         print(tPF[0], tPF[1], tPF[2], tPF[3], tPF[4], tPF[5], tPF[6], tPF[7], tPF[8], tPF[9], tPF[10], tPF[11], tPF[12], tPF[13], tPF[14], tPF[15])
 
         lock.release()
-#        time.sleep(0.05)
-        time.sleep(0.01)
+        time.sleep(0.05)
+#        time.sleep(0.01)
 
         # Pixel layout of D6T-44L-06 (16ch)
         #  ----- ----- ----- -----
