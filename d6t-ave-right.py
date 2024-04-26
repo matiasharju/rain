@@ -113,21 +113,21 @@ async def measure():
                 print("Incomplete I2C read. Expected:", OMRON_BUFFER_LENGTH, "bytes. Received:", bytes_read, "bytes.")
                 lock.release()  # Release the lock before continuing
                 pi.i2c_close(handle)  # Close the I2C handle to avoid deadlock
-                await asyncio.sleep(0.1)  # Delay before trying again to avoid busy waiting
+                await asyncio.sleep(3.0)  # Delay before trying again to avoid busy waiting
                 handle = pi.i2c_open(omron_bus, 0x0a)  # Reopen the I2C handle before retrying
-                await asyncio.sleep(0.1)  # Delay before retrying to avoid busy waiting
+                await asyncio.sleep(1.0)  # Delay before retrying to avoid busy waiting
                 await lock.acquire()  # Reacquire the lock before retrying
                 continue  # Skip processing incomplete data
         except Exception as e:
             print("I2C read error:", e)
             lock.release()              # Release the lock to avoid deadlock
             pi.i2c_close(handle)  # Close the I2C handle to avoid deadlock
-            await asyncio.sleep(0.1)  # Delay before trying again to avoid busy waiting
+            await asyncio.sleep(3.0)  # Delay before trying again to avoid busy waiting
             handle = pi.i2c_open(omron_bus, 0x0a)  # Reopen the I2C handle before retrying
-            await asyncio.sleep(0.1)    # Delay before trying again to avoid busy waiting
+            await asyncio.sleep(1.0)    # Delay before trying again to avoid busy waiting
             await lock.acquire()        # Reacquire the lock before retrying
             continue
-        
+
 
 #        (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
         
