@@ -2,38 +2,43 @@ import subprocess
 import psutil
 import time
 
-def is_process_running(process_name):
-    for process in psutil.process_iter(['pid', 'name']):
-        if process.info['name'] == process_name:
-            return True
-    return False
+def is_process_running(process_pid):
+    return psutil.pid_exists(process_pid)
 
 def start_subprocess(script_path):
-    subprocess.Popen(['python', script_path])
+    return subprocess.Popen(['python', script_path])
 
-def restart_if_not_running(script_path):
-    if not is_process_running(script_path):
-        start_subprocess(script_path)
-        print(f"{script_path} restarted.")
-
+# Kill existing pigpiod processes
 subprocess.run(['sudo', 'killall', 'pigpiod'])
+
+# Start pigpiod with timeout option
 subprocess.run(['sudo', 'pigpiod', '-t', '0'])
 
-leftScript = 'd6t-ave-left.py'
-rightScript = 'd6t-ave-right.py'
+leftScript = '/home/vattu/Documents/rain/d6t-ave-left.py'
+rightScript = '/home/vattu/Documents/rain/d6t-ave-right.py'
 
-# Initial start of the subprocesses
-start_subprocess('/home/vattu/Documents/rain/' + leftScript)
-start_subprocess('/home/vattu/Documents/rain/' + rightScript)
+# Start the subprocesses and store their PIDs
+left_proc = start_subprocess(leftScript)
+right_proc = start_subprocess(rightScript)
+
+# Store the PIDs of the subprocesses
+subprocess_pids = [left_proc.pid, right_proc.pid]
 
 try:
     # Continuous monitoring and restarting of subprocesses
     while True:
-        restart_if_not_running(leftScript)
-        restart_if_not_running(rightScript)
+        # Check if each subprocess is still running, and restart if not
+        for pid in subprocess_pids:
+            if not is_process_running(pid):
+                if pid == left_proc.pid:
+                    left_proc = start_subprocess(leftScript)
+                    print("Left subprocess restarted.")
+                elif pid == right_proc.pid:
+                    right_proc = start_subprocess(rightScript)
+                    print("Right subprocess restarted.")
         # Adjust the interval based on your needs
         time.sleep(5)  # Check every 5 seconds
 except KeyboardInterrupt:
-    # Handle keyboard interrupt (Ctrl+C) to gracefully terminate subprocesses
-    subprocess.Popen(['pkill', '-f', leftScript])
-    subprocess.Popen(['pkill', '-f', rightScript])
+    # Terminate subprocesses upon keyboard interrupt
+    left_proc.terminate()
+    right_proc.terminate()
