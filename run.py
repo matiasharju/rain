@@ -23,11 +23,8 @@ leftScript = 'd6t-ave-left.py'
 rightScript = 'd6t-ave-right.py'
 
 # Initial start of the subprocesses
-if not is_process_running(leftScript):
-    subprocess.Popen(['python', '/home/vattu/Documents/rain/' + leftScript])
-
-if not is_process_running(rightScript):
-    subprocess.Popen(['python', '/home/vattu/Documents/rain/' + rightScript])
+start_subprocess('/home/vattu/Documents/rain/' + leftScript)
+start_subprocess('/home/vattu/Documents/rain/' + rightScript)
 
 try:
     # Continuous monitoring and restarting of subprocesses
@@ -38,7 +35,5 @@ try:
         time.sleep(5)  # Check every 5 seconds
 except KeyboardInterrupt:
     # Handle keyboard interrupt (Ctrl+C) to gracefully terminate subprocesses
-    if is_process_running(leftScript):
-        subprocess.Popen(['pkill', '-f', leftScript])
-    if is_process_running(rightScript):
-        subprocess.Popen(['pkill', '-f', rightScript])
+    subprocess.Popen(['pkill', '-f', leftScript])
+    subprocess.Popen(['pkill', '-f', rightScript])
