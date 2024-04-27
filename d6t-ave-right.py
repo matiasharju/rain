@@ -109,7 +109,7 @@ async def measure():
         try:
             (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
             if bytes_read != OMRON_BUFFER_LENGTH:
-                print("Incomplete I2C read. Expected:", OMRON_BUFFER_LENGTH, "bytes. Received:", bytes_read, "bytes.")
+                print("R - Incomplete I2C read. Expected:", OMRON_BUFFER_LENGTH, "bytes. Received:", bytes_read, "bytes.")
                 lock.release()  # Release the lock before continuing
                 pi.i2c_close(handle)  # Close the I2C handle to avoid deadlock
                 await asyncio.sleep(5.0)  # Delay before trying again to avoid busy waiting
@@ -119,7 +119,7 @@ async def measure():
                 sys.exit(1)
             
         except Exception as e:
-            print("I2C read error:", e)
+            print("R - I2C read error:", e)
             lock.release()              # Release the lock to avoid deadlock
             pi.i2c_close(handle)  # Close the I2C handle to avoid deadlock
             await asyncio.sleep(5.0)  # Delay before trying again to avoid busy waiting
@@ -197,7 +197,7 @@ async def measure():
         #values_over_threshold = [value for value in tS if value > tRef + (threshold *10)]
         values_over_threshold = [value for value in tS if value > (tAverage * 10) + (config.threshold *10)]
         if values_over_threshold:
-            print("Temps over the threshold:", values_over_threshold)
+            print("R - Temps over the threshold:", values_over_threshold)
 #        else:
 #            print("No temps are over the threshold")
 
@@ -250,9 +250,9 @@ def calculate_average_temperature():
     # Calculate average temperature
     if num_readings > 0:
         tAverage = total_temperature / num_readings
-        print(f'Average temperature calculated: {tAverage:.2f}')
+        print(f'R - Average temperature calculated: {tAverage:.2f}')
     else:
-        print('No average temperatures available')
+        print('R - No average temperatures available')
 
 
 try:
