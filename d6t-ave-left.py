@@ -113,7 +113,8 @@ async def measure():
                 print("Incomplete I2C read. Expected:", OMRON_BUFFER_LENGTH, "bytes. Received:", bytes_read, "bytes.")
                 lock.release()  # Release the lock before continuing
                 pi.i2c_close(handle)  # Close the I2C handle to avoid deadlock
-                await asyncio.sleep(3.0)  # Delay before trying again to avoid busy waiting
+                pi.stop()   # Close pigpio
+                await asyncio.sleep(5.0)  # Delay before trying again to avoid busy waiting
                 handle = pi.i2c_open(omron_bus, 0x0a)  # Reopen the I2C handle before retrying
                 await asyncio.sleep(1.0)  # Delay before retrying to avoid busy waiting
                 await lock.acquire()  # Reacquire the lock before retrying
@@ -122,7 +123,8 @@ async def measure():
             print("I2C read error:", e)
             lock.release()              # Release the lock to avoid deadlock
             pi.i2c_close(handle)  # Close the I2C handle to avoid deadlock
-            await asyncio.sleep(3.0)  # Delay before trying again to avoid busy waiting
+            pi.stop()   # Close pigpio
+            await asyncio.sleep(5.0)  # Delay before trying again to avoid busy waiting
             handle = pi.i2c_open(omron_bus, 0x0a)  # Reopen the I2C handle before retrying
             await asyncio.sleep(1.0)    # Delay before trying again to avoid busy waiting
             await lock.acquire()        # Reacquire the lock before retrying
@@ -152,8 +154,6 @@ async def measure():
         # choose the lowest value of all pixels for reference temperature
         tRef = min(tP)
         tMax = max(tP)  # highest value of all pixels
-#        print('LEFT - MIN:', "{:.1f}".format(tRef * 0.1), f'AVE: {tAverage:.1f}', 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format((tMax * 0.1) - tAverage), 'VOL:', pygame.mixer.music.get_volume())
-        print('L - MIN:', "{:.1f}".format(tRef * 0.1), f'AVE: {tAverage:.1f}', 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format((tMax * 0.1) - tAverage))
 
         # format temperatures for printing
         tPF = []    # list of formatted temperatures
@@ -177,8 +177,14 @@ async def measure():
         # | P12 | P13 | P14 | P15       |
         #  ----- ----- ----- -----
 
-        # record reference temperature every minute
         current_time = time.time()
+
+        # print temperatures every 5 seconds
+        if current_time - last_record_time >= 5:
+            #print('LEFT - MIN:', "{:.1f}".format(tRef * 0.1), f'AVE: {tAverage:.1f}', 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format((tMax * 0.1) - tAverage), 'VOL:', pygame.mixer.music.get_volume())
+            print('L - MIN:', "{:.1f}".format(tRef * 0.1), f'AVE: {tAverage:.1f}', 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format((tMax * 0.1) - tAverage))
+
+        # record reference temperature every minute
         if current_time - last_record_time >= 60:
             record_reference_temperature()
             calculate_average_temperature()
@@ -224,7 +230,8 @@ def record_reference_temperature():
 
     # Save temperature and timestamp to file
     if tRef < 300:  # record only valid temperatures
-        with open('temperature_data_L.csv', 'a', newline='') as file:
+        #with open('temperature_data_L.csv', 'a', newline='') as file:  # append new temperatures to the existing ones
+        with open('temperature_data_L.csv', 'w', newline='') as file:   # overwrite the file with new temperatures
             writer = csv.writer(file)
             writer.writerow([timestamp, "{:.1f}".format(tRef * 0.1)])
 
