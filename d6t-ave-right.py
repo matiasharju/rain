@@ -240,7 +240,7 @@ def calculate_average_temperature():
 
     try:
         # Read temperature data from file and calculate total temperature and number of readings
-        with open('temperature_data_R.csv', 'rb') as file:
+        with open('temperature_data_R.csv', 'r') as file:
             reader = csv.reader(file)
             for row in reader:
                 total_temperature += float(row[1])
