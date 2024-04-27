@@ -251,7 +251,7 @@ def calculate_average_temperature():
             print(f'                                             R - Average temperature calculated: {tAverage:.2f}')
         else:
             print('                                             R - No average temperatures available')
-    except _csv.Error as e:
+    except csv.Error as e:
         print(f'Error reading CSV file: {e}')
 
 try:
