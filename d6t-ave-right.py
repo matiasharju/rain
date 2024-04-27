@@ -235,25 +235,24 @@ def record_reference_temperature():
             
 # **** Calculate average temperature ****
 def calculate_average_temperature():
-    global tAverage
-
     total_temperature = 0
     num_readings = 0
 
-    # Read temperature data from file and calculate total temperature and number of readings
-    with open('temperature_data_R.csv', 'r') as file:
-        reader = csv.reader(file)
-        for row in reader:
-            total_temperature += float(row[1])
-            num_readings += 1
-
-    # Calculate average temperature
-    if num_readings > 0:
-        tAverage = total_temperature / num_readings
-        print(f'                                             R - Average temperature calculated: {tAverage:.2f}')
-    else:
-        print('                                             R - No average temperatures available')
-
+    try:
+        # Read temperature data from file and calculate total temperature and number of readings
+        with open('temperature_data_R.csv', 'rb') as file:
+            reader = csv.reader(file)
+            for row in reader:
+                total_temperature += float(row[1])
+                num_readings += 1
+        # Calculate average temperature
+        if num_readings > 0:
+            tAverage = total_temperature / num_readings
+            print(f'                                             R - Average temperature calculated: {tAverage:.2f}')
+        else:
+            print('                                             R - No average temperatures available')
+    except _csv.Error as e:
+        print(f'Error reading CSV file: {e}')
 
 try:
     asyncio.run(main())
