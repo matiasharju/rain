@@ -38,9 +38,7 @@ try:
     while True:
         # Check if each subprocess is still running, and restart if not
         for script, pid in subprocess_pids.items():
-            print(f"Checking {script} with PID {pid}")
             if not is_process_running(pid):
-                print(f"{script} with PID {pid} is not running. Restarting...")
                 new_pid = start_subprocess(script)
                 if new_pid:
                     subprocess_pids[script] = new_pid
