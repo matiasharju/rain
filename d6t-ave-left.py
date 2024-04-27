@@ -71,6 +71,7 @@ result=i2c_bus.write_byte(OMRON_1,0x4c);
 # **** VARIABLES ****
 last_record_time = time.time()
 tAverage = 21.0
+letFirstTempRecording = True
 
 # **** MAIN COROUTINE ****
 async def main():
@@ -80,7 +81,7 @@ async def main():
 
 # **** MEASURE LOOP ****
 async def measure():
-    global tP, tPF, tRef, last_record_time, pi, handle
+    global tP, tPF, tRef, last_record_time, pi, handle, letFirstTempRecording
     while True:
         # acquire temperature readings
         global temperature_data
@@ -185,7 +186,8 @@ async def measure():
             print('L - MIN:', "{:.1f}".format(tRef * 0.1), f'AVE: {tAverage:.1f}', 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format((tMax * 0.1) - tAverage))
 
         # record reference temperature every minute
-        if current_time - last_record_time >= 60:
+        if current_time - last_record_time >= 60 or letFirstTempRecording:
+            letFirstTempRecording = False
             record_reference_temperature()
             calculate_average_temperature()
             last_record_time = current_time
