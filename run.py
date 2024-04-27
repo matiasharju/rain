@@ -1,8 +1,6 @@
 import subprocess
 import psutil
-
-subprocess.run(['sudo', 'killall', 'pigpiod'])
-subprocess.run(['sudo', 'pigpiod', '-t', '0'])
+import time
 
 def is_process_running(process_name):
     for process in psutil.process_iter(['pid', 'name']):
@@ -10,9 +8,21 @@ def is_process_running(process_name):
             return True
     return False
 
+def start_subprocess(script_path):
+    subprocess.Popen(['python', script_path])
+
+def restart_if_not_running(script_path):
+    if not is_process_running(script_path):
+        start_subprocess(script_path)
+        print(f"{script_path} restarted.")
+
+subprocess.run(['sudo', 'killall', 'pigpiod'])
+subprocess.run(['sudo', 'pigpiod', '-t', '0'])
+
 leftScript = 'd6t-ave-left.py'
 rightScript = 'd6t-ave-right.py'
 
+# Initial start of the subprocesses
 if not is_process_running(leftScript):
     subprocess.Popen(['python', '/home/vattu/Documents/rain/' + leftScript])
 
@@ -20,9 +30,12 @@ if not is_process_running(rightScript):
     subprocess.Popen(['python', '/home/vattu/Documents/rain/' + rightScript])
 
 try:
-    # Keep the main script running until interrupted by Ctrl+C
+    # Continuous monitoring and restarting of subprocesses
     while True:
-        pass
+        restart_if_not_running(leftScript)
+        restart_if_not_running(rightScript)
+        # Adjust the interval based on your needs
+        time.sleep(5)  # Check every 5 seconds
 except KeyboardInterrupt:
     # Handle keyboard interrupt (Ctrl+C) to gracefully terminate subprocesses
     if is_process_running(leftScript):
