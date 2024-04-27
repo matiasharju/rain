@@ -89,8 +89,6 @@ async def measure():
         lock = asyncio.Lock()
         await lock.acquire()
 
-
-
 #        # Read data in chunks of 16 bytes, v.2
 #        temperature_data = bytearray()  # Use bytearray to store binary data
 #
@@ -107,7 +105,6 @@ async def measure():
 #                print("I2C read error:", e)
 #                continue
         
-
         # Read all data at once (causes incomplete reads)
         try:
             (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
