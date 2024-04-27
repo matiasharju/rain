@@ -70,6 +70,7 @@ result=i2c_bus.write_byte(OMRON_1,0x4c);
 
 # **** VARIABLES ****
 last_record_time = time.time()
+last_print_time = time.time()
 tAverage = 21.0
 letFirstTempRecording = True
 
