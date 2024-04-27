@@ -179,7 +179,7 @@ async def measure():
         # print temperatures every 5 seconds
         if current_time - last_print_time >= 5:
             #print('LEFT - MIN:', "{:.1f}".format(tRef * 0.1), f'AVE: {tAverage:.1f}', 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format((tMax * 0.1) - tAverage), 'VOL:', pygame.mixer.music.get_volume())
-            print('L - MIN:', "{:.1f}".format(tRef * 0.1), f'AVE: {tAverage:.1f}', 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format((tMax * 0.1) - tAverage))
+            print('R - MIN:', "{:.1f}".format(tRef * 0.1), f'AVE: {tAverage:.1f}', 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format((tMax * 0.1) - tAverage))
             last_print_time = current_time
 
         # record reference temperature every minute
