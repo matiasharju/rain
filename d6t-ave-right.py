@@ -70,7 +70,9 @@ result=i2c_bus.write_byte(OMRON_1,0x4c);
 
 # **** VARIABLES ****
 last_record_time = time.time()
+last_print_time = time.time()
 tAverage = 21.0
+letFirstTempRecording = True
 
 # **** MAIN COROUTINE ****
 async def main():
@@ -80,31 +82,12 @@ async def main():
 
 # **** MEASURE LOOP ****
 async def measure():
-    global tP, tPF, tRef, last_record_time, pi, handle
+    global tP, tPF, tRef, last_record_time, pi, handle, letFirstTempRecording, last_print_time
     while True:
         # acquire temperature readings
         global temperature_data
         lock = asyncio.Lock()
         await lock.acquire()
-
-
-
-#        # Read data in chunks of 16 bytes, v.2
-#        temperature_data = bytearray()  # Use bytearray to store binary data
-#
-#        while len(temperature_data) < OMRON_BUFFER_LENGTH:
-#            remaining_bytes = OMRON_BUFFER_LENGTH - len(temperature_data)
-#            chunk_size = min(16, remaining_bytes)
-#            try:
-#                (bytes_read, temperature_data_chunk) = pi.i2c_read_device(handle, chunk_size)
-#                if bytes_read != chunk_size:
-#                    print("Incomplete I2C read. Expected:", chunk_size, "bytes. Received:", bytes_read, "bytes.")
-#                    continue
-#                temperature_data.extend(temperature_data_chunk)
-#            except Exception as e:
-#                print("I2C read error:", e)
-#                continue
-        
 
         # Read all data at once (causes incomplete reads)
         try:
@@ -113,21 +96,21 @@ async def measure():
                 print("Incomplete I2C read. Expected:", OMRON_BUFFER_LENGTH, "bytes. Received:", bytes_read, "bytes.")
                 lock.release()  # Release the lock before continuing
                 pi.i2c_close(handle)  # Close the I2C handle to avoid deadlock
-                await asyncio.sleep(3.0)  # Delay before trying again to avoid busy waiting
+                await asyncio.sleep(5.0)  # Delay before trying again to avoid busy waiting
                 handle = pi.i2c_open(omron_bus, 0x0a)  # Reopen the I2C handle before retrying
                 await asyncio.sleep(1.0)  # Delay before retrying to avoid busy waiting
                 await lock.acquire()  # Reacquire the lock before retrying
-                continue  # Skip processing incomplete data
+                sys.exit(1)
+
         except Exception as e:
             print("I2C read error:", e)
             lock.release()              # Release the lock to avoid deadlock
             pi.i2c_close(handle)  # Close the I2C handle to avoid deadlock
-            await asyncio.sleep(3.0)  # Delay before trying again to avoid busy waiting
+            await asyncio.sleep(5.0)  # Delay before trying again to avoid busy waiting
             handle = pi.i2c_open(omron_bus, 0x0a)  # Reopen the I2C handle before retrying
             await asyncio.sleep(1.0)    # Delay before trying again to avoid busy waiting
             await lock.acquire()        # Reacquire the lock before retrying
-            continue
-
+            sys.exit(1)
 
 #        (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
         
@@ -177,9 +160,17 @@ async def measure():
         # | P12 | P13 | P14 | P15       |
         #  ----- ----- ----- -----
 
-        # record reference temperature every minute
         current_time = time.time()
-        if current_time - last_record_time >= 60:
+
+        # print temperatures every 5 seconds
+        if current_time - last_print_time >= 5:
+            #print('LEFT - MIN:', "{:.1f}".format(tRef * 0.1), f'AVE: {tAverage:.1f}', 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format((tMax * 0.1) - tAverage), 'VOL:', pygame.mixer.music.get_volume())
+            print('L - MIN:', "{:.1f}".format(tRef * 0.1), f'AVE: {tAverage:.1f}', 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format((tMax * 0.1) - tAverage))
+            last_print_time = current_time
+
+        # record reference temperature every minute
+        if current_time - last_record_time >= 60 or letFirstTempRecording:
+            letFirstTempRecording = False
             record_reference_temperature()
             calculate_average_temperature()
             last_record_time = current_time

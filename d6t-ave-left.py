@@ -119,7 +119,8 @@ async def measure():
                 handle = pi.i2c_open(omron_bus, 0x0a)  # Reopen the I2C handle before retrying
                 await asyncio.sleep(1.0)  # Delay before retrying to avoid busy waiting
                 await lock.acquire()  # Reacquire the lock before retrying
-                continue  # Skip processing incomplete data
+                sys.exit(1)
+            
         except Exception as e:
             print("I2C read error:", e)
             lock.release()              # Release the lock to avoid deadlock
