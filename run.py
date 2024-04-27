@@ -3,7 +3,10 @@ import psutil
 import time
 
 def is_process_running(process_pid):
-    return psutil.pid_exists(process_pid)
+    if psutil.pid_exists(process_pid):
+        process = psutil.Process(process_pid)
+        return process.status() != psutil.STATUS_ZOMBIE
+    return False
 
 def start_subprocess(script_path):
     try:
