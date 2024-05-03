@@ -71,7 +71,8 @@ result=i2c_bus.write_byte(OMRON_1,0x4c);
 # **** VARIABLES ****
 last_record_time = time.time()
 last_print_time = time.time()
-tAverage = 21.0
+tAverage = 17.6
+tRecorded = 0
 letFirstTempRecording = True
 
 # **** MAIN COROUTINE ****
@@ -82,7 +83,7 @@ async def main():
 
 # **** MEASURE LOOP ****
 async def measure():
-    global tP, tPF, tRef, last_record_time, pi, handle, letFirstTempRecording, last_print_time
+    global tP, tPF, tRef, last_record_time, pi, handle, letFirstTempRecording, last_print_time, tRecorded
     while True:
         # acquire temperature readings
         global temperature_data
@@ -187,7 +188,7 @@ async def measure():
         if current_time - last_record_time >= 60 or letFirstTempRecording:
             letFirstTempRecording = False
             record_reference_temperature()
-            calculate_average_temperature()
+            #calculate_average_temperature()
             last_record_time = current_time
 #        print(f'Average temperature: {tAverage:.2f}')
 
@@ -196,7 +197,8 @@ async def measure():
         #tS = [tP[5], tP[6], tP[9], tP[10]]     # four innermost pixels
         #tS = [tP[0], tP[1], tP[2], tP[4], tP[5], tP[6], tP[8], tP[9], tP[10]]
         #values_over_threshold = [value for value in tS if value > tRef + (threshold *10)]
-        values_over_threshold = [2000 > value for value in tS if value > (tAverage * 10) + (config.threshold *10)]
+        #values_over_threshold = [2000 > value for value in tS if value > (tAverage * 10) + (config.threshold *10)]
+        values_over_threshold = [2000 > value for value in tS if value > (tRecorded) + (config.threshold *10)]
         if values_over_threshold:
             print("L - Temps over the threshold:", values_over_threshold)
 #        else:
@@ -225,15 +227,17 @@ async def measure():
 
 # **** Record reference temperature ****
 def record_reference_temperature():
+    tRecorded = tRef
+
     # Get current timestamp
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    #timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     # Save temperature and timestamp to file
-    if tRef < 300:  # record only valid temperatures
+    #if tRef < 300:  # record only valid temperatures
         #with open('temperature_data_L.csv', 'a', newline='') as file:  # append new temperatures to the existing ones
-        with open('temperature_data_L.csv', 'w', newline='') as file:   # overwrite the file with new temperatures
-            writer = csv.writer(file)
-            writer.writerow([timestamp, "{:.1f}".format(tRef * 0.1)])
+    #    with open('temperature_data_L.csv', 'w', newline='') as file:   # overwrite the file with new temperatures
+    #        writer = csv.writer(file)
+    #        writer.writerow([timestamp, "{:.1f}".format(tRef * 0.1)])
 
 # **** Calculate average temperature ****
 def calculate_average_temperature():
@@ -242,12 +246,33 @@ def calculate_average_temperature():
     total_temperature = 0
     num_readings = 0
 
+    # Get the total number of lines in the file
+    with open('temperature_data_L.csv', 'r', newline='') as file:
+        total_lines = sum(1 for _ in file)
+
+    # Determine the number of lines to read based on whether there are at least 180 lines
+    num_lines_to_read = min(180, total_lines)
+
     # Read temperature data from file and calculate total temperature and number of readings
     with open('temperature_data_L.csv', 'r') as file:
-        reader = csv.reader(file)
-        for row in reader:
+#        reader = csv.reader(file)
+#        for row in reader:
+#            total_temperature += float(row[1])
+#            num_readings += 1
+
+        # Move the file pointer to the correct position to read the last 180 lines
+        file.seek(max(0, total_lines - num_lines_to_read))
+
+        # Read the last 180 measurements
+        for line in file:
+            row = line.strip().split(',')
             total_temperature += float(row[1])
-            num_readings += 1
+            num_readings += 1 
+
+#        for line in (file.readlines() [-180:]):
+#            row = line.split(',')
+#            total_temperature += float(row[1])
+#            num_readings += 1
 
     # Calculate average temperature
     if num_readings > 0:
