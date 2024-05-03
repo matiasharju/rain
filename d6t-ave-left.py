@@ -83,7 +83,7 @@ async def main():
 
 # **** MEASURE LOOP ****
 async def measure():
-    global tP, tPF, tRef, last_record_time, pi, handle, letFirstTempRecording, last_print_time, tRecorded
+    global tPRaw, tP, tPF, tRef, last_record_time, pi, handle, letFirstTempRecording, last_print_time, tRecorded
     while True:
         # acquire temperature readings
         global temperature_data
@@ -148,7 +148,8 @@ async def measure():
         tP13 = (256 * temperature_data[29] + temperature_data[28])
         tP14 = (256 * temperature_data[31] + temperature_data[30])
         tP15 = (256 * temperature_data[33] + temperature_data[32])
-        tP = [tP0, tP1, tP2, tP3, tP4, tP5, tP6, tP7, tP8, tP9, tP10, tP11, tP12, tP13, tP14, tP15]
+        tPRaw = [tP0, tP1, tP2, tP3, tP4, tP5, tP6, tP7, tP8, tP9, tP10, tP11, tP12, tP13, tP14, tP15]
+        tP = [value for value in tPRaw if value < 430]  # filter out invalid temperatures
 
         # choose the lowest value of all pixels for reference temperature
         #tRef = min(tP)
