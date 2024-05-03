@@ -188,7 +188,7 @@ async def measure():
         if current_time - last_record_time >= 60 or letFirstTempRecording:
             letFirstTempRecording = False
             record_reference_temperature()
-            calculate_average_temperature()
+            #calculate_average_temperature()
             last_record_time = current_time
 #        print(f'Average temperature: {tAverage:.2f}')
 
