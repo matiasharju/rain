@@ -148,22 +148,13 @@ async def measure():
         tP13 = (256 * temperature_data[29] + temperature_data[28])
         tP14 = (256 * temperature_data[31] + temperature_data[30])
         tP15 = (256 * temperature_data[33] + temperature_data[32])
-        tPRaw = [tP0, tP1, tP2, tP3, tP4, tP5, tP6, tP7, tP8, tP9, tP10, tP11, tP12, tP13, tP14, tP15]
-        #tP = [value for value in tPRaw if value < 430]  # filter out invalid temperatures
-        tP = [value for value in tPRaw if value < 430] if any(value < 430 for value in tPRaw) else tP
+        tP = [tP0, tP1, tP2, tP3, tP4, tP5, tP6, tP7, tP8, tP9, tP10, tP11, tP12, tP13, tP14, tP15]
 
         # choose the lowest value of all pixels for reference temperature
         #tRef = min(tP)
         #tMax = max(tP)  # highest value of all pixels
-        #tRef = min(tP) if min(tP) < 430 else tRef
-        #tMax = max(tP) if max(tP) < 430 else tMax
-        if tP:  # Check if tP is not empty
-            tRef = min(tP)
-            tMax = max(tP)
-        else:
-            tRef = tRef  # or any other default value you want to assign when tP is empty
-            tMax = tMax  # or any other default value you want to assign when tP is empty
-
+        tRef = min(tP) if min(tP) < 430 else tRef
+        tMax = max(tP) if max(tP) < 430 else tMax
 
         # format temperatures for printing
         tPF = []    # list of formatted temperatures
