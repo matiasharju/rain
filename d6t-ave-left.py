@@ -151,9 +151,11 @@ async def measure():
         tP = [tP0, tP1, tP2, tP3, tP4, tP5, tP6, tP7, tP8, tP9, tP10, tP11, tP12, tP13, tP14, tP15]
 
         # choose the lowest value of all pixels for reference temperature
-        tRef = min(tP)
-        tMax = max(tP)  # highest value of all pixels
-
+        #tRef = min(tP)
+        #tMax = max(tP)  # highest value of all pixels
+        tRef = min(tP) if min(tP) < 2000 else tRef
+        tMax = max(tP) if max(tP) < 2000 else tMax
+        
         # format temperatures for printing
         tPF = []    # list of formatted temperatures
         for i in range(0, len(tP)):
