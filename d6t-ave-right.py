@@ -153,8 +153,8 @@ async def measure():
         # choose the lowest value of all pixels for reference temperature
         #tRef = min(tP)
         #tMax = max(tP)  # highest value of all pixels
-        tRef = min(tP) if min(tP) < 2000 else tRef
-        tMax = max(tP) if max(tP) < 2000 else tMax
+        tRef = min(tP) if min(tP) < 430 else tRef
+        tMax = max(tP) if max(tP) < 430 else tMax
 
 
         # format temperatures for printing
