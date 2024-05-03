@@ -71,7 +71,8 @@ result=i2c_bus.write_byte(OMRON_1,0x4c);
 # **** VARIABLES ****
 last_record_time = time.time()
 last_print_time = time.time()
-tAverage = 21.0
+tAverage = 17.6
+tRecorded = 176
 letFirstTempRecording = True
 
 # **** MAIN COROUTINE ****
@@ -179,7 +180,8 @@ async def measure():
         # print temperatures every 5 seconds
         if current_time - last_print_time >= 5:
             #print('LEFT - MIN:', "{:.1f}".format(tRef * 0.1), f'AVE: {tAverage:.1f}', 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format((tMax * 0.1) - tAverage), 'VOL:', pygame.mixer.music.get_volume())
-            print('                                             R - MIN:', "{:.1f}".format(tRef * 0.1), f'AVE: {tAverage:.1f}', 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format((tMax * 0.1) - tAverage))
+            #print('                                             R - MIN:', "{:.1f}".format(tRef * 0.1), f'AVE: {tAverage:.1f}', 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format((tMax * 0.1) - tAverage))
+            print('                                             R - MIN:', "{:.1f}".format(tRef * 0.1), f'REC:', "{:.1f}".format(tRecorded * 0.1), 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format(tMax - tRecorded))
             last_print_time = current_time
 
         # record reference temperature every minute
@@ -195,7 +197,8 @@ async def measure():
         #tS = [tP[5], tP[6], tP[9], tP[10]]     # four innermost pixels
         #tS = [tP[0], tP[1], tP[2], tP[4], tP[5], tP[6], tP[8], tP[9], tP[10]]
         #values_over_threshold = [value for value in tS if value > tRef + (threshold *10)]
-        values_over_threshold = [2000 > value for value in tS if value > (tAverage * 10) + (config.threshold *10)]
+        #values_over_threshold = [2000 > value for value in tS if value > (tAverage * 10) + (config.threshold *10)]
+        values_over_threshold = [2000 > value for value in tS if value > (tRecorded) + (config.threshold *10)]
         if values_over_threshold:
             print("                                             R - Temps over the threshold:", values_over_threshold)
 #        else:
@@ -224,14 +227,19 @@ async def measure():
 
 # **** Record reference temperature ****
 def record_reference_temperature():
+    global tRecorded
+    tRecorded = tRef
+    print('                                             R - Reference temperature recorded:', "{:.1f}".format(tRecorded * 0.1))
+
+
     # Get current timestamp
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    #timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     # Save temperature and timestamp to file
-    if tRef < 300:  # record only valid temperatures
-        with open('temperature_data_R.csv', 'a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([timestamp, "{:.1f}".format(tRef * 0.1)])
+    #if tRef < 300:  # record only valid temperatures
+    #    with open('temperature_data_R.csv', 'a', newline='') as file:
+    #        writer = csv.writer(file)
+    #        writer.writerow([timestamp, "{:.1f}".format(tRef * 0.1)])
             
 # **** Calculate average temperature ****
 def calculate_average_temperature():
