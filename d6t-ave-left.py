@@ -230,6 +230,7 @@ async def measure():
 # **** Record reference temperature ****
 def record_reference_temperature():
     tRecorded = tRef
+    print('L - Reference temperature recorded:', "{:.1f}".format(tRecorded * 0.1))
 
     # Get current timestamp
     #timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
