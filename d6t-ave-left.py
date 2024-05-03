@@ -184,8 +184,6 @@ async def measure():
             print('L - MIN:', "{:.1f}".format(tRef * 0.1), f'AVE: {tAverage:.1f}', 'MAX:', "{:.1f}".format(tMax * 0.1), 'DIF:', "{:.1f}".format((tMax * 0.1) - tAverage))
             last_print_time = current_time
 
-        print('Recorded:', tRecorded)
-
         # record reference temperature every minute
         if current_time - last_record_time >= 60 or letFirstTempRecording:
             letFirstTempRecording = False
@@ -229,6 +227,7 @@ async def measure():
 
 # **** Record reference temperature ****
 def record_reference_temperature():
+    global tRecorded
     tRecorded = tRef
     print('L - Reference temperature recorded:', "{:.1f}".format(tRecorded * 0.1))
 
