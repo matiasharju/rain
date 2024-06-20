@@ -1,9 +1,5 @@
 #! /usr/bin/python
 
-# TMaxs script reads the temperature data from Omron D6T-44L-06 sensor and triggers a sound when the temperature rises above a certain threshold.
-# The sound is faded in when the temperature rises above the threshold and faded out when the temperature drops below the threshold.
-# The threshold is calculated based on the reference temperature which is the average over time of the lowest temperature of all pixels.
-
 import os
 
 # Set /dev/gpiomem the correct permissions
@@ -27,10 +23,7 @@ import csv
 from datetime import datetime
 import config
 
-omron_bus = 4             # CHANGE OMRON I2C BUS HERE
-#threshold_temp_up = 24.6  # above which sound starts to fade in
-#threshold_marginal = 0.2  # substracted from temp_up, used for triggering fade out
-#threshold = 1.5             # how many celsius degrees above the reference temperature until triggered
+omron_bus = 4              # Omron I2C bus
 threshold = config.threshold
 
 # **** SOUND ****
@@ -56,12 +49,12 @@ pygame.mixer.music.set_volume(0.0)
 
 # **** OMRON ****
 i2c_bus = smbus.SMBus(omron_bus)
-OMRON_1=0x0a 					# 7 bit I2C address of Omron MEMS Temp Sensor D6T-44L
+OMRON_1=0x0a 					    # 7 bit I2C address of Omron MEMS Temp Sensor D6T-44L
 OMRON_BUFFER_LENGTH=35				# Omron data buffer size
 temperature_data=[0]*OMRON_BUFFER_LENGTH 	# initialize the temperature data list
 
 # intialize the pigpio library and socket connection to the daemon (pigpiod)
-pi = pigpio.pi()              # use defaults
+pi = pigpio.pi()                    # use defaults
 version = pi.get_pigpio_version()
 print ('PiGPIO version = '+str(version))
 handle = pi.i2c_open(omron_bus, 0x0a) # open Omron D6T device at address 0x0a
@@ -91,7 +84,7 @@ async def measure():
         lock = asyncio.Lock()
         await lock.acquire()
 
-#        # Read data in chunks of 16 bytes, v.2
+#        # read data in chunks of 16 bytes, v.2
 #        temperature_data = bytearray()  # Use bytearray to store binary data
 #
 #        while len(temperature_data) < OMRON_BUFFER_LENGTH:
@@ -107,24 +100,24 @@ async def measure():
 #                print("I2C read error:", e)
 #                continue
         
-        # Read all data at once (causes incomplete reads)
+        # read all data at once (causes incomplete reads)
         try:
             (bytes_read, temperature_data) = pi.i2c_read_device(handle, len(temperature_data))
             if bytes_read != OMRON_BUFFER_LENGTH:
                 print("                                             R - Incomplete I2C read. Expected:", OMRON_BUFFER_LENGTH, "bytes. Received:", bytes_read, "bytes.")
-                lock.release()  # Release the lock before continuing
-                pi.i2c_close(handle)  # Close the I2C handle to avoid deadlock
+                lock.release()            # Release the lock before continuing
+                pi.i2c_close(handle)      # Close the I2C handle to avoid deadlock
                 await asyncio.sleep(5.0)  # Delay before trying again to avoid busy waiting
                 handle = pi.i2c_open(omron_bus, 0x0a)  # Reopen the I2C handle before retrying
                 await asyncio.sleep(1.0)  # Delay before retrying to avoid busy waiting
-                await lock.acquire()  # Reacquire the lock before retrying
+                await lock.acquire()      # Reacquire the lock before retrying
                 sys.exit(1)
             
         except Exception as e:
             print("                                             R - I2C read error:", e)
             lock.release()              # Release the lock to avoid deadlock
-            pi.i2c_close(handle)  # Close the I2C handle to avoid deadlock
-            await asyncio.sleep(5.0)  # Delay before trying again to avoid busy waiting
+            pi.i2c_close(handle)        # Close the I2C handle to avoid deadlock
+            await asyncio.sleep(5.0)    # Delay before trying again to avoid busy waiting
             handle = pi.i2c_open(omron_bus, 0x0a)  # Reopen the I2C handle before retrying
             await asyncio.sleep(1.0)    # Delay before trying again to avoid busy waiting
             await lock.acquire()        # Reacquire the lock before retrying
